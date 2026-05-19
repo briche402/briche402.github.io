@@ -1,0 +1,30 @@
+image_id: 0607
+case: success #4
+margin (DCTNet - best_other): +0.0312
+best_other_model: KDSNet-R101
+
+=== Per-model mIoU on this image ===
+  DCTNet        : 0.9582 ★
+  KDSNet-R101   : 0.9270
+  NAFNet        : 0.9269
+  KDSNet-R50    : 0.9211
+  Cellpose3     : 0.9045
+  STDC1         : 0.9032
+  STDC2         : 0.8628
+  BiSeNetV2     : 0.8589
+  BEVANet       : 0.8454
+  SegNeXt-S     : 0.8076
+  DDRNet-23     : 0.8048
+  MSDSeg        : 0.7945
+  SegNeXt-T     : 0.7757
+  SegNeXt-B     : 0.7353
+  MSDU-Net      : 0.7268
+  Fast-SCNN     : 0.7094
+  ESMDL-UNet    : 0.6604
+
+Files:
+  input.png             — original image
+  gt_mask.png           — RGBA: white=blur, semi-transparent black=sharp
+  gt_overlay.png        — GT mask overlaid (sharp regions darkened)
+  {model}_mask.png      — prediction mask (15 models)
+  {model}_overlay.png   — prediction overlaid (15 models)

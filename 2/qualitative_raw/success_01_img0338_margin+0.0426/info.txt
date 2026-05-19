@@ -1,0 +1,30 @@
+image_id: 0338
+case: success #1
+margin (DCTNet - best_other): +0.0426
+best_other_model: Cellpose3
+
+=== Per-model mIoU on this image ===
+  DCTNet        : 0.7552 ★
+  Cellpose3     : 0.7126
+  KDSNet-R50    : 0.6252
+  KDSNet-R101   : 0.5386
+  NAFNet        : 0.4983
+  MSDSeg        : 0.4707
+  MSDU-Net      : 0.4502
+  STDC2         : 0.4421
+  STDC1         : 0.3917
+  BiSeNetV2     : 0.3528
+  ESMDL-UNet    : 0.1972
+  BEVANet       : 0.1788
+  SegNeXt-B     : 0.1259
+  Fast-SCNN     : 0.0907
+  SegNeXt-T     : 0.0897
+  SegNeXt-S     : 0.0838
+  DDRNet-23     : 0.0831
+
+Files:
+  input.png             — original image
+  gt_mask.png           — RGBA: white=blur, semi-transparent black=sharp
+  gt_overlay.png        — GT mask overlaid (sharp regions darkened)
+  {model}_mask.png      — prediction mask (15 models)
+  {model}_overlay.png   — prediction overlaid (15 models)

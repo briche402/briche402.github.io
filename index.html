@@ -1,70 +1,1173 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="robots" content="noindex, nofollow">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Project Page</title>
-<style>
-  *, *::before, *::after { box-sizing: border-box; }
-  body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-    background: #fff;
-    color: #111;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-  }
-  main {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 80px 24px 64px;
-  }
-  h1 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin: 0 0 8px;
-    letter-spacing: -0.01em;
-  }
-  .sub {
-    color: #666;
-    font-size: 0.95rem;
-    margin: 0 0 40px;
-  }
-  ul.cards {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: 12px;
-  }
-  ul.cards a {
-    display: block;
-    padding: 20px 22px;
-    border: 1px solid #e2e2e2;
-    border-radius: 8px;
-    text-decoration: none;
-    color: inherit;
-    transition: border-color 0.15s ease, background 0.15s ease;
-  }
-  ul.cards a:hover {
-    border-color: #111;
-    background: #fafafa;
-  }
-  .card-title {
-    font-weight: 600;
-    font-size: 1.02rem;
-  }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+  <title>BOCCHI: A More Realistic and Challenging Benchmark for Local Motion Blur Detection with MSDCT-UNet</title>
+  <meta name="description" content="BOCCHI: 633-image real-captured benchmark + MSDCT-UNet, a frequency-aware encoder-decoder for local motion blur detection." />
+  <meta name="keywords" content="Motion blur detection, Local motion blur dataset, DCT attention, Frequency-domain learning, Semantic segmentation" />
+
+  <style>
+    :root{
+      --fg:#161616; --muted:#6b7280; --border:#e5e7eb; --bg:#ffffff;
+      --link:#0d6efd; --container:1080px;
+      --ours-color:#EF4444; --gt-color:#16a34a; --accent:#2563eb;
+      --best:#fddede; --second:#ffdfbf; --third:#fef0c6;
+    }
+    html,body{ background:#fff; color:var(--fg); margin:0; padding:0; overflow-x:hidden; }
+    body{ font-family: system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif; line-height:1.75; }
+    a{ color:var(--link); text-decoration:none; }
+    a:hover{ text-decoration:underline; }
+    img{ max-width:100%; height:auto; display:block; }
+    .muted{ color:var(--muted); }
+    .container{ max-width:var(--container); margin:0 auto; padding:0 20px; }
+
+    /* Sticky nav */
+    .sticky-nav{
+      position:fixed; top:0; left:0; right:0; z-index:1000;
+      background:rgba(255,255,255,0.95); backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--border);
+      transform:translateY(-100%); transition:transform .3s;
+    }
+    .sticky-nav.visible{ transform:translateY(0); }
+    .sticky-nav-inner{ max-width:var(--container); margin:0 auto; padding:10px 20px; display:flex; justify-content:space-between; align-items:center; }
+    .sticky-nav .short-title{ font-weight:700; font-size:0.95rem; }
+    .sticky-nav-links{ display:flex; gap:18px; flex-wrap:wrap; }
+    .sticky-nav-links a{ color:var(--muted); font-size:0.9rem; }
+    .sticky-nav-links a:hover{ color:var(--link); }
+
+    /* Hero */
+    header{ padding:80px 0 12px; text-align:center; }
+    header h1{ font-size:clamp(1.55rem,2.4vw,2.15rem); line-height:1.3; margin:.25rem 0 .35rem; font-weight:800; }
+    header .venue{ font-size:1rem; color:var(--muted); margin:6px 0 4px; }
+    header .authors{ margin:6px 0; line-height:1.4; font-size:1.05rem; }
+    header .review-tag{ font-size:0.95rem; color:var(--muted); margin:4px 0 0; }
+
+    .resource-links{ display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin:18px 0 22px; }
+    .resource-links a{
+      display:inline-flex; align-items:center; gap:8px; padding:10px 22px;
+      border:2px solid var(--link); border-radius:30px; font-weight:500; font-size:0.95rem;
+      color:var(--link); background:transparent; transition:all 0.2s ease;
+    }
+    .resource-links a:hover{ background:var(--link); color:#fff; transform:translateY(-2px); box-shadow:0 4px 10px rgba(13,110,253,.25); text-decoration:none; }
+    .resource-links a.disabled{ opacity:0.5; pointer-events:none; border-color:#aaa; color:#aaa; }
+    .resource-links a.is-ours{ border-color:var(--ours-color); color:var(--ours-color); }
+    .resource-links a.is-ours:hover{ background:var(--ours-color); color:#fff; box-shadow:0 4px 10px rgba(239,68,68,.25); }
+
+    .hero-figure{ margin:20px auto; max-width:960px; }
+    .tagline{ text-align:center; font-size:1.05rem; color:var(--muted); max-width:820px; margin:0 auto 20px; }
+
+    /* Sections */
+    section{ padding:32px 0; }
+    section h2{ text-align:center; font-size:clamp(1.3rem,2vw,1.55rem); font-weight:800; margin:0 0 14px; }
+
+    .abstract-section{ background:#f8fafc; border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+    .abstract-section .content{ max-width:820px; margin:0 auto; text-align:justify; }
+
+    hr.section-sep{ border:none; border-top:1px solid var(--border); margin:1.5rem 0; }
+
+    /* Tabs */
+    .tab-nav{ display:flex; justify-content:center; gap:6px; margin:14px 0; flex-wrap:wrap; }
+    .tab-nav-grid7{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; max-width:980px; margin:14px auto; }
+    .tab-nav-grid7 button{ width:100%; min-height:64px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:6px 8px; line-height:1.15; }
+    .tab-nav-grid7 .tab-name{ font-size:0.86rem; font-weight:600; pointer-events:none; }
+    .tab-nav-grid7 .tab-meta{ font-size:0.7rem; opacity:0.7; font-variant-numeric:tabular-nums; pointer-events:none; }
+    .tab-nav-grid7 button.active{ box-shadow:0 2px 6px rgba(13,110,253,0.25); }
+    .tab-nav-grid7 button.is-ours.active{ box-shadow:0 2px 6px rgba(239,68,68,0.3); }
+    .tab-nav-grid7 button.active .tab-meta,
+    .tab-nav-grid7 button.is-ours .tab-meta{ opacity:0.95; }
+    .tab-nav button{
+      padding:8px 16px; border:2px solid var(--border); border-radius:20px; background:#fff;
+      cursor:pointer; font-size:0.88rem; font-weight:500; transition:all .2s;
+    }
+    .tab-nav button.active{ border-color:var(--link); background:var(--link); color:#fff; }
+    .tab-nav button:hover:not(.active){ border-color:var(--link); color:var(--link); }
+    .tab-nav button.is-ours.active{ border-color:var(--ours-color); background:var(--ours-color); color:#fff; }
+    .tab-nav button.is-ours{ color:var(--ours-color); border-color:var(--ours-color); }
+    .tab-nav button.is-ours:hover:not(.active){ background:rgba(239,68,68,0.06); }
+
+    /* GT tab (qualitative): green */
+    .tab-nav button.is-gt{ color:var(--gt-color); border-color:var(--gt-color); }
+    .tab-nav button.is-gt:hover:not(.active){ background:rgba(22,163,74,0.08); }
+    .tab-nav button.is-gt.active{ border-color:var(--gt-color); background:var(--gt-color); color:#fff; }
+
+    /* BOCCHI tabs (dataset): low-saturation pink */
+    .tab-nav button.is-bocchi{ color:#be185d; border-color:#f9a8d4; }
+    .tab-nav button.is-bocchi:hover:not(.active){ background:rgba(236,72,153,0.07); }
+    .tab-nav button.is-bocchi.active{ border-color:#ec4899; background:#ec4899; color:#fff; }
+
+    /* Inference tabs (dataset): low-saturation red (distinct from Ours' bright red) */
+    .tab-nav button.is-inference{ color:#b91c1c; border-color:#fca5a5; }
+    .tab-nav button.is-inference:hover:not(.active){ background:rgba(220,38,38,0.07); }
+    .tab-nav button.is-inference.active{ border-color:#dc2626; background:#dc2626; color:#fff; }
+
+    /* Grouped tab bar (BOCCHI / Inference) */
+    .tab-nav-grouped{ display:flex; justify-content:center; gap:18px; flex-wrap:wrap; }
+    .tab-group{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 14px; border-radius:999px; border:1.5px dashed transparent;
+    }
+    .tab-group-label{
+      font-size:0.78rem; font-weight:700; letter-spacing:0.04em;
+      text-transform:uppercase; padding-right:4px;
+    }
+    .tab-group.is-bocchi-group{
+      background:rgba(236,72,153,0.06); border-color:#f9a8d4;
+    }
+    .tab-group.is-bocchi-group .tab-group-label{ color:#be185d; }
+    .tab-group.is-inference-group{
+      background:rgba(220,38,38,0.06); border-color:#fca5a5;
+    }
+    .tab-group.is-inference-group .tab-group-label{ color:#b91c1c; }
+    .tab-content{ display:none; }
+    .tab-content.active{ display:block; }
+
+    /* Dataset Showcase Grid (4 col x 6 row = 24 cells) */
+    .dataset-grid{
+      display:grid; grid-template-columns:repeat(4, 1fr); gap:8px;
+      max-width:1080px; margin:14px auto;
+    }
+    .dataset-cell{
+      aspect-ratio:3/2; background:#e5e7eb; overflow:hidden; border-radius:3px;
+      position:relative;
+    }
+    .dataset-cell img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .dataset-cell.placeholder{
+      background:linear-gradient(135deg, #f3f4f6 25%, #e5e7eb 25%, #e5e7eb 50%, #f3f4f6 50%, #f3f4f6 75%, #e5e7eb 75%);
+      background-size:8px 8px;
+    }
+
+    .dataset-stats{
+      display:flex; flex-wrap:wrap; gap:24px; justify-content:center;
+      max-width:820px; margin:14px auto 0; padding:14px 0;
+      border-top:1px solid var(--border);
+    }
+    .stat-item{ text-align:center; min-width:120px; }
+    .stat-value{ font-size:1.5rem; font-weight:800; color:var(--accent); }
+    .stat-label{ font-size:0.85rem; color:var(--muted); margin-top:2px; }
+
+    /* Qualitative Comparison Grid (5 row x 4 col per tab) */
+    .qual-grid{
+      display:grid; grid-template-columns:repeat(4, 1fr); gap:8px;
+      max-width:980px; margin:14px auto;
+    }
+    .qual-cell{
+      aspect-ratio:3/2; background:#e5e7eb; overflow:hidden; border-radius:6px;
+      position:relative; border:1px solid var(--border);
+    }
+    .qual-cell img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .qual-cell.placeholder{
+      background:linear-gradient(135deg, #f3f4f6 25%, #e5e7eb 25%, #e5e7eb 50%, #f3f4f6 50%, #f3f4f6 75%, #e5e7eb 75%);
+      background-size:8px 8px;
+      display:flex; align-items:center; justify-content:center;
+      color:#94a3b8; font-size:0.75rem;
+    }
+    .qual-cell .cell-label{
+      position:absolute; bottom:4px; left:6px;
+      background:rgba(0,0,0,0.7); color:#fff;
+      padding:2px 8px; border-radius:8px; font-size:0.72rem; font-weight:600;
+    }
+    .qual-cell .iou-label{
+      position:absolute; top:4px; right:6px;
+      background:rgba(0,0,0,0.78); color:#fff;
+      padding:2px 7px; border-radius:6px; font-size:0.72rem; font-weight:600;
+      font-family: ui-monospace,Menlo,Monaco,"Courier New",monospace;
+    }
+    .qual-cell.is-input .cell-label{ background:rgba(75,85,99,0.85); }
+    /* Method cells no longer get an in-cell label (would occlude the mask).
+       The current method is shown once in the frame header instead. */
+    .qual-cell.is-method .cell-label{ display:none; }
+    .qual-cell.is-ours{ border:2px solid var(--ours-color); box-shadow:0 0 8px rgba(239,68,68,0.15); }
+    .qual-cell.is-gt{ border:2px solid var(--gt-color); }
+
+    /* Outer frame around the qualitative grid; header shows current method */
+    .qual-frame{
+      border:2px solid var(--border); border-radius:14px;
+      background:#fff; padding:0; overflow:hidden;
+      transition:border-color 0.2s, box-shadow 0.2s;
+    }
+    .qual-frame.is-ours{ border-color:var(--ours-color); box-shadow:0 0 0 4px rgba(239,68,68,0.08); }
+    .qual-frame.is-gt{ border-color:var(--gt-color); box-shadow:0 0 0 4px rgba(22,163,74,0.08); }
+    .qual-frame-header{
+      display:flex; align-items:baseline; justify-content:center; gap:10px;
+      padding:12px 16px; background:#f8fafc; border-bottom:1px solid var(--border);
+      transition:background 0.2s, color 0.2s;
+    }
+    .qual-frame.is-ours .qual-frame-header{ background:rgba(239,68,68,0.08); }
+    .qual-frame.is-gt .qual-frame-header{ background:rgba(22,163,74,0.08); }
+    .qual-frame-label{ font-size:0.8rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; }
+    .qual-frame-method{ font-size:1.1rem; font-weight:700; color:#0f172a; }
+    .qual-frame.is-ours .qual-frame-method{ color:var(--ours-color); }
+    .qual-frame.is-gt .qual-frame-method{ color:var(--gt-color); }
+    .qual-frame-meta{ font-size:0.85rem; color:var(--muted); font-variant-numeric:tabular-nums; }
+    .qual-frame .qual-grid{ padding:14px; gap:8px; }
+
+    /* Active-tab styling reinforcement: distinct background already applied via .tab-nav button.active */
+
+    /* Zoomable */
+    .zoomable{
+      position:relative; border:1px solid var(--border); border-radius:12px;
+      overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,.08); cursor:zoom-in;
+    }
+    .zoomable > img{ display:block; width:100%; height:auto; transition:transform .18s ease; will-change:transform; }
+    .zoomable.placeholder-fig{
+      background:linear-gradient(135deg, #f3f4f6 25%, #e5e7eb 25%, #e5e7eb 50%, #f3f4f6 50%, #f3f4f6 75%, #e5e7eb 75%);
+      background-size:14px 14px;
+      aspect-ratio:16/9; display:flex; align-items:center; justify-content:center;
+      color:#94a3b8; font-weight:600; font-size:1rem; cursor:default;
+    }
+
+    /* Tables */
+    .table-wrapper{ width:100%; overflow-x:auto; margin:1rem 0; }
+    table{ border-collapse:collapse; margin:0 auto; font-size:0.88rem; width:100%; max-width:920px; }
+    th,td{ padding:8px 12px; border-bottom:1px solid var(--border); text-align:center; }
+    th{ background:#f1f5f9; font-weight:600; border-top:2px solid #666; font-size:0.85rem; }
+    table tr:last-child td{ border-bottom:2px solid #666; }
+    .best{ background:var(--best); }
+    .second{ background:var(--second); }
+    .third{ background:var(--third); }
+    table .ours-row{ background:rgba(239,68,68,0.05); }
+    table .ours-row td:first-child{ color:var(--ours-color); font-weight:700; }
+    table .avg-row{ font-style:italic; }
+
+    /* Lightbox overlay for dataset cells (click to zoom, click again to close) */
+    .lightbox-overlay{
+      display:none; position:fixed; inset:0; z-index:10000;
+      background:rgba(0,0,0,0.92);
+      align-items:center; justify-content:center;
+      padding:40px;
+      cursor:zoom-out;
+      animation:lb-fade .15s ease-out;
+    }
+    .lightbox-overlay.open{ display:flex; }
+    @keyframes lb-fade{ from{opacity:0;} to{opacity:1;} }
+    .lightbox-img{
+      max-width:90vw; max-height:90vh;
+      object-fit:contain;
+      box-shadow:0 8px 32px rgba(0,0,0,0.6);
+      border-radius:6px;
+      cursor:zoom-out;
+    }
+    body.lb-open{ overflow:hidden; }
+
+    /* Per-image scatter plot */
+    .scatter-wrap{ max-width:560px; margin:0 auto; position:relative; }
+    .scatter-wrap svg{ width:100%; height:auto; display:block; }
+    .scatter-axis{ stroke:#475569; stroke-width:1; }
+    .scatter-tick{ stroke:#cbd5e1; stroke-width:1; }
+    .scatter-tick-text{ fill:#64748b; font-size:10px; font-family:inherit; }
+    .scatter-axis-label{ fill:#1e293b; font-size:12px; font-weight:600; font-family:inherit; }
+    .scatter-diag{ stroke:#94a3b8; stroke-width:1; stroke-dasharray:4 4; }
+    .scatter-dot{ cursor:default; transition:r 0.1s, stroke-width 0.1s; }
+    .scatter-dot.win{ fill:#10b981; fill-opacity:0.55; stroke:#047857; stroke-width:0.8; }
+    .scatter-dot.loss{ fill:#ef4444; fill-opacity:0.55; stroke:#b91c1c; stroke-width:0.8; }
+    .scatter-dot.hi{ stroke:#0d6efd; stroke-width:2; fill-opacity:0.85; cursor:pointer; }
+    .scatter-dot:hover{ stroke-width:2.5; }
+    .scatter-tip{
+      position:absolute; pointer-events:none;
+      background:#1e293b; color:#fff; font-size:0.78rem;
+      padding:6px 10px; border-radius:6px; opacity:0; transform:translate(-50%,-110%);
+      transition:opacity 0.1s; white-space:nowrap; z-index:5;
+      font-variant-numeric:tabular-nums;
+    }
+    .scatter-tip.show{ opacity:1; }
+    .scatter-tip::after{
+      content:''; position:absolute; left:50%; bottom:-5px; transform:translateX(-50%);
+      border:5px solid transparent; border-top-color:#1e293b; border-bottom:0;
+    }
+    .scatter-legend{
+      display:flex; flex-wrap:wrap; justify-content:center; gap:14px;
+      font-size:0.82rem; margin-top:10px; color:#475569;
+    }
+    .scatter-legend .lg-dot{
+      display:inline-block; width:10px; height:10px; border-radius:50%;
+      margin-right:5px; vertical-align:middle;
+    }
+    .scatter-legend .lg-win{ background:#10b981; border:1px solid #047857; }
+    .scatter-legend .lg-loss{ background:#ef4444; border:1px solid #b91c1c; }
+    .scatter-legend .lg-hi{ background:#10b981; border:2px solid #0d6efd; }
+    .qual-cell.flash{ animation:cell-flash 1.4s ease-out; }
+    @keyframes cell-flash{
+      0%{ box-shadow:0 0 0 4px rgba(13,110,253,0); }
+      30%{ box-shadow:0 0 0 4px rgba(13,110,253,0.7); }
+      100%{ box-shadow:0 0 0 4px rgba(13,110,253,0); }
+    }
+
+    /* BibTeX block + copy button (used when bibtex section is enabled post-acceptance) */
+    .bibtex-wrap{ position:relative; max-width:780px; margin:0 auto; }
+    .bibtex-wrap pre{
+      background:#f8fafc; border:1px solid var(--border); border-radius:8px;
+      padding:14px; overflow-x:auto; font-size:0.85rem; margin:0;
+    }
+    .copy-btn{
+      position:absolute; top:8px; right:8px;
+      background:#fff; border:1px solid var(--border); border-radius:6px;
+      padding:4px 10px; font-size:0.78rem; cursor:pointer; color:var(--link);
+    }
+    .copy-btn:hover{ background:var(--link); color:#fff; border-color:var(--link); }
+    .dataset-cell, .qual-cell{ cursor:zoom-in; }
+
+    /* Method modules (stacked vertically for readability) */
+    .modules-grid{
+      display:flex; flex-direction:column; gap:20px;
+      max-width:920px; margin:14px auto;
+    }
+    .module-card{
+      border:1px solid var(--border); border-radius:10px; padding:18px 22px;
+      background:#fff;
+    }
+    .module-card h4{ margin:0 0 10px; font-size:1.05rem; text-align:center; }
+    .module-card .module-fig{
+      background:#f8fafc; border-radius:6px; margin-bottom:12px;
+      padding:10px;
+      display:flex; align-items:center; justify-content:center;
+      color:#94a3b8; font-size:0.85rem; font-weight:500;
+      min-height:120px;
+    }
+    .module-card .module-fig img{ width:100%; max-height:420px; height:auto; object-fit:contain; }
+    .module-card p{ margin:0; font-size:0.9rem; color:var(--muted); text-align:center; }
+
+    footer{ text-align:center; padding:30px 0; color:var(--muted); font-size:0.85rem; border-top:1px solid var(--border); margin-top:40px; }
+
+    /* Responsive */
+    @media (max-width: 768px){
+      .dataset-grid{ grid-template-columns:repeat(2, 1fr); }
+      .qual-grid{ grid-template-columns:repeat(2, 1fr); }
+      /* .modules-grid already vertical (flex-column), no override needed */
+    }
+  </style>
 </head>
 <body>
-<main>
-  <h1>Project Page</h1>
-  <p class="sub">Anonymous project listing.</p>
-  <ul class="cards">
-    <li><a href="./1/"><span class="card-title">Project 1</span></a></li>
-    <li><a href="./2/"><span class="card-title">Project 2</span></a></li>
-  </ul>
-</main>
+
+  <!-- Sticky nav -->
+  <nav class="sticky-nav" id="stickyNav">
+    <div class="sticky-nav-inner">
+      <span class="short-title">BOCCHI / MSDCT-UNet</span>
+      <div class="sticky-nav-links">
+        <a href="#abstract">Abstract</a>
+        <a href="#dataset">Dataset</a>
+        <a href="#qualitative">Qualitative</a>
+        <a href="#results">Results</a>
+        <a href="#method">Method</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================== -->
+  <!-- 1. HERO                                         -->
+  <!-- ============================================== -->
+  <header class="container">
+    <h1>BOCCHI: A More Realistic and Challenging Benchmark<br>for Local Motion Blur Detection with MSDCT-UNet</h1>
+    <p class="venue">Submitted to ACCV 2026</p>
+    <div class="authors"><span>Anonymous Authors</span></div>
+    <p class="review-tag">Under Review</p>
+
+    <!-- Resource buttons. HF Model is live (anonymous account); the rest enabled at camera-ready. -->
+    <div class="resource-links">
+      <a href="#" class="disabled">📄 Paper (Coming Soon)</a>
+      <a href="#" class="disabled">💻 Code (Coming Soon)</a>
+      <a href="https://huggingface.co/datasets/aianonymous12/BOCCHI" target="_blank" rel="noopener">📊 Dataset</a>
+      <a href="https://huggingface.co/aianonymous12/msdct-unet" target="_blank" rel="noopener">🤗 HF Model</a>
+    </div>
+    <!-- Camera-ready replacement (uncomment after acceptance, replace REPLACE_* with real URLs):
+    <div class="resource-links">
+      <a href="REPLACE_ARXIV_URL" target="_blank" rel="noopener">📄 Paper (arXiv)</a>
+      <a href="REPLACE_CODE_URL" target="_blank" rel="noopener">💻 Code (GitHub)</a>
+      <a href="REPLACE_DATASET_URL" target="_blank" rel="noopener">📊 Dataset</a>
+      <a href="REPLACE_HF_URL" target="_blank" rel="noopener">🤗 HF Model</a>
+    </div>
+    -->
+    <!-- Camera-ready: replace "Anonymous Authors" + "Under Review" tag above with real names + venue tag -->
+    <!--
+    <div class="authors">
+      <span>REPLACE_AUTHOR_1<sup>1</sup></span>,
+      <span>REPLACE_AUTHOR_2<sup>2</sup></span>
+      <div class="affiliations">
+        <span><sup>1</sup>REPLACE_AFFIL_1</span>
+        <span><sup>2</sup>REPLACE_AFFIL_2</span>
+      </div>
+    </div>
+    -->
+
+    <!-- Teaser figure (Brian: replace src with assets/teaser.svg) -->
+    <figure class="hero-figure zoomable" data-scale="1.4">
+      <img src="assets/Teaser.svg" alt="Teaser: BOCCHI dataset + MSDCT-UNet pipeline"
+           onerror="this.style.display='none'; this.parentElement.classList.add('placeholder-fig'); this.parentElement.innerHTML='[Teaser Figure Placeholder: replace with assets/Teaser.svg]';">
+    </figure>
+
+    <p class="tagline">
+      A <strong>real-captured benchmark</strong> with textured-foreground blur, paired with a <strong>frequency-aware encoder–decoder</strong> for local motion blur detection.
+    </p>
+  </header>
+
+  <main>
+
+    <!-- ============================================== -->
+    <!-- 2. ABSTRACT                                     -->
+    <!-- ============================================== -->
+    <section id="abstract" class="abstract-section">
+      <div class="container">
+        <h2>Abstract</h2>
+        <div class="content">
+          <p>
+            Local motion blur detection requires pixel-level localization of blurred regions. Existing benchmarks suffer a shortcut: smooth blur on textured backgrounds, that lets simple frequency heuristics suffice. We introduce <strong>BOCCHI</strong> (<strong>B</strong>lurred <strong>O</strong>bjects <strong>C</strong>aptured across <strong>C</strong>ameras with <strong>H</strong>uman-annotated <strong>I</strong>magery), 633 real-captured, pixel-annotated images whose textured blurred foregrounds against smooth backgrounds invert this assumption. We further propose <strong>MSDCT-UNet</strong> (Multi-Scale Discrete Cosine Transform UNet), a frequency-aware encoder-decoder that extracts multi-scale DCT priors from gradients, weights them via multi-head DCT Attention, and fuses frequency–spatial cues through FiLM. MSDCT-UNet surpasses the second-best baseline by 1.25 percentage points in mIoU on BOCCHI and leads in boundary localization; BOCCHI-trained models match ReLoBlur in cross-dataset mIoU with about half the samples and outperform on Precision (+2.0 pp) and Recall (+15.5 pp).
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 3. DATASET SHOWCASE                             -->
+    <!-- ============================================== -->
+    <section id="dataset">
+      <div class="container">
+        <h2>BOCCHI Dataset</h2>
+        <p style="text-align:center;" class="muted">
+          633 real-captured images across 5 cameras and diverse indoor/outdoor scenes. Toggle between RGB inputs and pixel-level blur masks.
+        </p>
+
+        <div class="tab-nav tab-nav-grouped" id="dataset-tabs">
+          <div class="tab-group is-bocchi-group">
+            <span class="tab-group-label">BOCCHI Dataset</span>
+            <button class="is-bocchi active" onclick="switchTab('dataset', 'bocchi-rgb')">Input</button>
+            <button class="is-bocchi" onclick="switchTab('dataset', 'bocchi-mask')">Mask</button>
+          </div>
+          <div class="tab-group is-inference-group">
+            <span class="tab-group-label">Inference Dataset</span>
+            <button class="is-inference" onclick="switchTab('dataset', 'inference-rgb')">Input</button>
+            <button class="is-inference" onclick="switchTab('dataset', 'inference-mask')">Mask</button>
+          </div>
+        </div>
+
+        <!-- Tab: BOCCHI Input RGB -->
+        <div id="dataset-bocchi-rgb" class="tab-content active">
+          <div class="dataset-grid" id="dataset-grid-bocchi-rgb"></div>
+        </div>
+
+        <!-- Tab: BOCCHI Mask -->
+        <div id="dataset-bocchi-mask" class="tab-content">
+          <div class="dataset-grid" id="dataset-grid-bocchi-mask"></div>
+        </div>
+
+        <!-- Tab: Inference Input RGB -->
+        <div id="dataset-inference-rgb" class="tab-content">
+          <div class="dataset-grid" id="dataset-grid-inference-rgb"></div>
+        </div>
+
+        <!-- Tab: Inference Mask -->
+        <div id="dataset-inference-mask" class="tab-content">
+          <div class="dataset-grid" id="dataset-grid-inference-mask"></div>
+        </div>
+
+        <div class="dataset-stats">
+          <div class="stat-item"><div class="stat-value">633</div><div class="stat-label">Images</div></div>
+          <div class="stat-item"><div class="stat-value">5</div><div class="stat-label">Cameras</div></div>
+          <div class="stat-item"><div class="stat-value">0.78</div><div class="stat-label">Mean Blur Ratio</div></div>
+          <div class="stat-item"><div class="stat-value">68.7</div><div class="stat-label">Mean Blur Gradient</div></div>
+        </div>
+
+        <!-- Two distinguishing properties of BOCCHI: blur-ratio + gradient inversion -->
+        <h3 style="text-align:center; margin-top:1.5rem; font-size:1.05rem;">Two Distinguishing Properties</h3>
+        <figure class="zoomable" data-scale="1.4" style="max-width:960px; margin:14px auto;">
+          <img src="assets/blur_gradient_combined.svg" loading="lazy" decoding="async" alt="Blur-ratio distribution and gradient statistics across datasets"
+               onerror="this.style.display='none'; this.parentElement.classList.add('placeholder-fig'); this.parentElement.innerHTML='[Blur+Gradient Stats Placeholder: replace with assets/blur_gradient_combined.svg]';">
+        </figure>
+        <p class="muted" style="text-align:center; max-width:780px; margin:8px auto; font-size:0.9rem;">
+          <strong>(a)</strong> Blur-ratio distribution: BlurDataset spans uniformly but only 200 samples; ReLoBlur concentrates at low ratios (&lt;0.3); BOCCHI at high ratios (&gt;0.6).
+          <strong>(b)</strong> Per-dataset distribution of mean gradient in blur vs.&nbsp;sharp regions. BOCCHI and the Inference Dataset are the only datasets with Δ &gt; 0 (textured-foreground regime).
+        </p>
+      </div>
+    </section>
+
+    <hr class="section-sep container">
+
+    <!-- ============================================== -->
+    <!-- 4. QUALITATIVE COMPARISON                       -->
+    <!-- ============================================== -->
+    <section id="qualitative">
+      <div class="container">
+        <h2>Qualitative Comparison</h2>
+        <p style="text-align:center;" class="muted">
+          Switch tabs to compare predictions across methods on the BOCCHI validation set. Each tab shows 4 input–prediction pairs across multiple cases.
+        </p>
+
+        <div class="tab-nav tab-nav-grid7" id="qual-tabs">
+          <button class="is-gt active" onclick="switchQualTab('gt')"><span class="tab-name">GT</span><span class="tab-meta">reference</span></button>
+          <button class="is-ours" onclick="switchQualTab('DCTNet')"><span class="tab-name">MSDCT-UNet (Ours)</span><span class="tab-meta">0.850 · #1</span></button>
+          <button onclick="switchQualTab('Cellpose3')"><span class="tab-name">Cellpose3</span><span class="tab-meta">0.838 · #2</span></button>
+          <button onclick="switchQualTab('STDC2')"><span class="tab-name">STDC2</span><span class="tab-meta">0.799 · #3</span></button>
+          <button onclick="switchQualTab('MSDU_Net')"><span class="tab-name">MSDU-Net</span><span class="tab-meta">0.796 · #4</span></button>
+          <button onclick="switchQualTab('KDSNet_R50')"><span class="tab-name">KDSNet-R50</span><span class="tab-meta">0.783 · #5</span></button>
+          <button onclick="switchQualTab('STDC1')"><span class="tab-name">STDC1</span><span class="tab-meta">0.778 · #6</span></button>
+          <button onclick="switchQualTab('BEVANet')"><span class="tab-name">BEVANet</span><span class="tab-meta">0.778 · #6</span></button>
+          <button onclick="switchQualTab('KDSNet_R101')"><span class="tab-name">KDSNet-R101</span><span class="tab-meta">0.773 · #8</span></button>
+          <button onclick="switchQualTab('BiSeNetV2')"><span class="tab-name">BiSeNetV2</span><span class="tab-meta">0.760 · #9</span></button>
+          <button onclick="switchQualTab('NAFNet')"><span class="tab-name">NAFNet</span><span class="tab-meta">0.760 · #9</span></button>
+          <button onclick="switchQualTab('MSDSeg')"><span class="tab-name">MSDSeg</span><span class="tab-meta">0.714 · #11</span></button>
+          <button onclick="switchQualTab('DDRNet_23')"><span class="tab-name">DDRNet-23</span><span class="tab-meta">0.701 · #12</span></button>
+          <button onclick="switchQualTab('ESMDL_UNet')"><span class="tab-name">ESMDL-UNet</span><span class="tab-meta">0.677 · #13</span></button>
+        </div>
+
+        <div id="qual-content">
+          <div class="qual-frame">
+            <div class="qual-frame-header">
+              <span class="qual-frame-label">Currently showing:</span>
+              <span class="qual-frame-method" id="qual-current-method">GT</span>
+              <span class="qual-frame-meta" id="qual-current-meta">reference</span>
+            </div>
+            <div class="qual-grid" id="qual-grid"></div>
+          </div>
+        </div>
+
+        <p style="text-align:center; font-size:0.85rem; color:var(--muted); max-width:780px; margin:14px auto 0;">
+          Selected success cases where MSDCT-UNet outperforms baselines. Predictions are binary masks (white = predicted blur).
+        </p>
+      </div>
+    </section>
+
+    <hr class="section-sep container">
+
+    <!-- ============================================== -->
+    <!-- 5. QUANTITATIVE RESULTS                         -->
+    <!-- ============================================== -->
+    <section id="results">
+      <div class="container">
+        <h2>Quantitative Results</h2>
+
+        <h3 style="text-align:center; margin-top:1rem; font-size:1.05rem;">In-Domain Performance (on respective dataset's validation set)</h3>
+        <p class="muted" style="text-align:center; font-size:0.85rem;">
+          Cells highlighted as <span class="best" style="padding:1px 6px; border-radius:3px;">1st</span> /
+          <span class="second" style="padding:1px 6px; border-radius:3px;">2nd</span> /
+          <span class="third" style="padding:1px 6px; border-radius:3px;">3rd</span> per column.
+        </p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th rowspan="2">Method</th>
+                <th colspan="3">BOCCHI</th>
+                <th colspan="3">BlurDataset</th>
+                <th colspan="3">ReLoBlur</th>
+              </tr>
+              <tr>
+                <th>mIoU</th><th>Dice</th><th>BdF1</th>
+                <th>mIoU</th><th>Dice</th><th>BdF1</th>
+                <th>mIoU</th><th>Dice</th><th>BdF1</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>MSDU-Net</td>      <td>0.796</td><td>0.918</td><td class="third">0.561</td><td class="second">0.640</td><td class="second">0.747</td><td class="third">0.330</td><td>0.919</td><td>0.911</td><td class="third">0.820</td></tr>
+              <tr><td>BiSeNetV2</td>     <td>0.760</td><td>0.903</td><td>0.470</td><td>0.525</td><td>0.646</td><td>0.166</td><td>0.917</td><td>0.909</td><td>0.800</td></tr>
+              <tr><td>STDC1</td>         <td>0.778</td><td>0.911</td><td>0.457</td><td>0.550</td><td>0.681</td><td>0.260</td><td>0.917</td><td>0.910</td><td>0.795</td></tr>
+              <tr><td>STDC2</td>         <td class="third">0.799</td><td class="third">0.921</td><td>0.495</td><td>0.558</td><td>0.683</td><td>0.197</td><td>0.918</td><td>0.910</td><td>0.800</td></tr>
+              <tr><td>NAFNet</td>        <td>0.760</td><td>0.902</td><td>0.452</td><td>0.523</td><td>0.627</td><td>0.213</td><td class="third">0.922</td><td>0.913</td><td>0.821</td></tr>
+              <tr><td>DDRNet-23</td>     <td>0.701</td><td>0.886</td><td>0.351</td><td>0.520</td><td>0.643</td><td>0.172</td><td>0.912</td><td>0.906</td><td>0.766</td></tr>
+              <tr><td>Cellpose3</td>     <td class="second">0.838</td><td class="second">0.935</td><td class="second">0.643</td><td class="best">0.665</td><td class="best">0.763</td><td class="best">0.403</td><td class="second">0.929</td><td class="second">0.921</td><td class="second">0.850</td></tr>
+              <tr><td>KDSNet-R50</td>    <td>0.783</td><td>0.915</td><td>0.469</td><td>0.549</td><td>0.671</td><td>0.219</td><td>0.919</td><td>0.912</td><td>0.803</td></tr>
+              <tr><td>KDSNet-R101</td>   <td>0.773</td><td>0.905</td><td>0.446</td><td>0.544</td><td>0.662</td><td>0.243</td><td class="third">0.921</td><td class="third">0.914</td><td>0.812</td></tr>
+              <tr><td>MSDSeg</td>        <td>0.714</td><td>0.892</td><td>0.360</td><td>0.517</td><td>0.598</td><td>0.202</td><td>0.911</td><td>0.905</td><td>0.766</td></tr>
+              <tr><td>BEVANet</td>       <td>0.778</td><td>0.912</td><td>0.518</td><td>0.548</td><td>0.653</td><td>0.217</td><td>0.919</td><td>0.911</td><td>0.798</td></tr>
+              <tr><td>ESMDL-UNet</td>    <td>0.677</td><td>0.866</td><td>0.270</td><td>0.432</td><td>0.603</td><td>0.139</td><td>0.798</td><td>0.793</td><td>0.364</td></tr>
+              <tr class="ours-row"><td><strong>MSDCT-UNet (Ours)</strong></td><td class="best"><strong>0.850</strong></td><td class="best"><strong>0.948</strong></td><td class="best"><strong>0.683</strong></td><td class="third">0.640</td><td class="third">0.732</td><td class="second">0.369</td><td class="best"><strong>0.930</strong></td><td class="best"><strong>0.922</strong></td><td class="best"><strong>0.851</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 style="text-align:center; margin-top:1.5rem; font-size:1.05rem;">Cross-Dataset Generalization (Inference Dataset, no fine-tuning)</h3>
+        <p class="muted" style="text-align:center; font-size:0.85rem;">
+          Per-cell metrics: mIoU / Precision / Recall. Average row colored to highlight BOCCHI as the strongest training source.
+        </p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th rowspan="2">Method</th>
+                <th colspan="3">Trained on BOCCHI (633)</th>
+                <th colspan="3">Trained on BlurDS (200)</th>
+                <th colspan="3">Trained on ReLoBlur (1,200)</th>
+              </tr>
+              <tr>
+                <th>mIoU</th><th>Prec</th><th>Rec</th>
+                <th>mIoU</th><th>Prec</th><th>Rec</th>
+                <th>mIoU</th><th>Prec</th><th>Rec</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>MSDU-Net</td>      <td>0.378</td><td>0.464</td><td>0.680</td><td>0.249</td><td>0.335</td><td>0.411</td><td>0.354</td><td>0.419</td><td>0.519</td></tr>
+              <tr><td>BiSeNetV2</td>     <td>0.358</td><td>0.449</td><td>0.720</td><td>0.215</td><td>0.371</td><td>0.594</td><td>0.369</td><td>0.442</td><td>0.623</td></tr>
+              <tr><td>STDC1</td>         <td>0.355</td><td>0.440</td><td>0.670</td><td>0.268</td><td>0.356</td><td>0.367</td><td>0.365</td><td>0.435</td><td>0.637</td></tr>
+              <tr><td>STDC2</td>         <td>0.376</td><td>0.451</td><td>0.667</td><td>0.277</td><td>0.385</td><td>0.419</td><td>0.382</td><td>0.439</td><td>0.537</td></tr>
+              <tr><td>NAFNet</td>        <td>0.362</td><td>0.445</td><td>0.686</td><td>0.249</td><td>0.366</td><td>0.424</td><td>0.350</td><td>0.410</td><td>0.570</td></tr>
+              <tr><td>DDRNet-23</td>     <td>0.334</td><td>0.434</td><td>0.726</td><td>0.255</td><td>0.388</td><td>0.509</td><td>0.365</td><td>0.435</td><td>0.572</td></tr>
+              <tr><td>Cellpose3</td>     <td>0.420</td><td>0.479</td><td>0.697</td><td>0.236</td><td>0.359</td><td>0.423</td><td>0.377</td><td>0.431</td><td>0.458</td></tr>
+              <tr><td>KDSNet-R50</td>    <td>0.370</td><td>0.446</td><td>0.719</td><td>0.252</td><td>0.376</td><td>0.475</td><td>0.373</td><td>0.433</td><td>0.536</td></tr>
+              <tr><td>KDSNet-R101</td>   <td>0.373</td><td>0.450</td><td>0.642</td><td>0.255</td><td>0.382</td><td>0.445</td><td>0.385</td><td>0.442</td><td>0.505</td></tr>
+              <tr><td>MSDSeg</td>        <td>0.362</td><td>0.455</td><td>0.736</td><td>0.271</td><td>0.284</td><td>0.153</td><td>0.368</td><td>0.444</td><td>0.492</td></tr>
+              <tr><td>BEVANet</td>       <td>0.364</td><td>0.436</td><td>0.681</td><td>0.260</td><td>0.380</td><td>0.397</td><td>0.366</td><td>0.439</td><td>0.603</td></tr>
+              <tr><td>ESMDL-UNet</td>    <td>0.346</td><td>0.454</td><td>0.728</td><td>0.301</td><td>0.404</td><td>0.387</td><td>0.345</td><td>0.435</td><td>0.535</td></tr>
+              <tr class="ours-row"><td><strong>MSDCT-UNet (Ours)</strong></td><td>0.403</td><td>0.475</td><td>0.695</td><td>0.276</td><td>0.330</td><td>0.257</td><td>0.388</td><td>0.414</td><td>0.449</td></tr>
+              <tr class="avg-row"><td><em>Average</em></td>
+                <td class="best"><strong>0.369</strong></td><td class="best"><strong>0.452</strong></td><td class="best"><strong>0.696</strong></td>
+                <td class="third">0.259</td><td class="third">0.363</td><td class="third">0.405</td>
+                <td class="second">0.368</td><td class="second">0.432</td><td class="second">0.541</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="muted" style="text-align:center; font-size:0.85rem; margin-top:8px;">
+          BOCCHI-trained models match or exceed ReLoBlur-trained ones on mIoU/Precision/Recall using only 53% of the training samples.
+        </p>
+
+        <!-- ===== Per-image scatter (interactive) ===== -->
+        <h3 style="text-align:center; margin-top:2.4rem; font-size:1.05rem;">Per-Image Comparison: MSDCT-UNet vs Best Baseline</h3>
+        <p class="muted" style="text-align:center; font-size:0.85rem; max-width:720px; margin:4px auto 12px;">
+          Each dot is one validation image (n=63). x = mIoU of the strongest baseline on that image; y = mIoU of MSDCT-UNet. Above the diagonal: we win; below: best baseline wins. Highlighted dots are the 8 cases shown in the qualitative grid below; click any to jump there.
+        </p>
+        <div id="scatter-wrap" class="scatter-wrap"></div>
+        <div class="scatter-legend">
+          <span><span class="lg-dot lg-win"></span>Ours wins (above y=x)</span>
+          <span><span class="lg-dot lg-loss"></span>Baseline wins (below y=x)</span>
+          <span><span class="lg-dot lg-hi"></span>Shown in Qualitative below (click to jump)</span>
+          <span class="muted" id="scatter-summary"></span>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-sep container">
+
+    <!-- ============================================== -->
+    <!-- 6. METHOD OVERVIEW                              -->
+    <!-- ============================================== -->
+    <section id="method">
+      <div class="container">
+        <h2>Method Overview</h2>
+
+        <figure class="zoomable" data-scale="1.4" style="max-width:960px; margin:14px auto;">
+          <img src="assets/Overview.svg" loading="lazy" decoding="async" alt="MSDCT-UNet architecture: DCT extraction + 4-stage encoder-decoder with NeXtBlock + FiLM, AFASPP bottleneck, DCTAttention"
+               onerror="this.style.display='none'; this.parentElement.classList.add('placeholder-fig'); this.parentElement.innerHTML='[Architecture Figure Placeholder: replace with assets/Overview.svg]';">
+        </figure>
+
+        <p class="muted" style="text-align:center; max-width:780px; margin:8px auto 14px; font-size:0.92rem;">
+          <strong>Left:</strong> DCT Feature Extraction (grayscale + Sobel → multi-scale local DCTs at <em>n</em> ∈ {3,7,15,31} → 57-channel <em>F</em><sub>DCT</sub>).
+          <strong>Middle:</strong> 4-stage encoder-decoder with NeXtBlock + FiLM fusion, an Attentive Frequency ASPP bottleneck, and stage-specific DCT Attention.
+          <strong>Right:</strong> Deep supervision over the main and three auxiliary heads.
+        </p>
+
+        <h3 style="text-align:center; margin-top:1.2rem; font-size:1rem;">Key Modules</h3>
+        <div class="modules-grid">
+          <div class="module-card">
+            <h4>DCT Attention</h4>
+            <div class="module-fig">
+              <img src="assets/DCTAttn.svg" loading="lazy" decoding="async" alt="DCT Attention"
+                   onerror="this.style.display='none'; this.parentElement.innerHTML='[DCT Attention Placeholder]';">
+            </div>
+            <p>Multi-head, position-dependent frequency weighting over 57 DCT channels with SE-gating and temperature-scaled softmax.</p>
+          </div>
+          <div class="module-card">
+            <h4>FiLM Fusion</h4>
+            <div class="module-fig">
+              <img src="assets/En-Decoder%20bottleneck.svg" loading="lazy" decoding="async" alt="FiLM Fusion"
+                   onerror="this.style.display='none'; this.parentElement.innerHTML='[FiLM Placeholder]';">
+            </div>
+            <p>Frequency-conditioned affine modulation prevents strong spatial edges from overriding weaker frequency cues.</p>
+          </div>
+          <div class="module-card">
+            <h4>AFASPP</h4>
+            <div class="module-fig">
+              <img src="assets/AFASPP.svg" loading="lazy" decoding="async" alt="AFASPP"
+                   onerror="this.style.display='none'; this.parentElement.innerHTML='[AFASPP Placeholder]';">
+            </div>
+            <p>Attentive Frequency ASPP fuses multi-scale spatial context with global frequency evidence at the bottleneck.</p>
+          </div>
+        </div>
+
+        <p class="muted" style="text-align:center; font-size:0.85rem; margin-top:14px;">
+          Full method details, including DCT extraction pseudocode and ablations, are available in the paper and supplementary.
+        </p>
+      </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- 7. BIBTEX (commented out, enable after acceptance) -->
+    <!-- ============================================== -->
+    <!--
+    <hr class="section-sep container">
+    <section id="bibtex">
+      <div class="container">
+        <h2>Citation</h2>
+        <div class="bibtex-wrap">
+          <button type="button" class="copy-btn" onclick="(function(b){var t=b.parentElement.querySelector('pre').innerText;navigator.clipboard.writeText(t).then(function(){var o=b.textContent;b.textContent='Copied';setTimeout(function(){b.textContent=o;},1500);});})(this);">Copy</button>
+          <pre id="bibtex-text">
+@inproceedings{REPLACE_BIBKEY,
+  title     = {BOCCHI: A More Realistic and Challenging Benchmark for Local Motion Blur Detection with MSDCT-UNet},
+  author    = {AUTHOR NAMES},
+  booktitle = {Asian Conference on Computer Vision (ACCV)},
+  year      = {2026},
+  pages     = {XXX--XXX},
+  publisher = {Springer}
+}
+          </pre>
+        </div>
+      </div>
+    </section>
+
+    <hr class="section-sep container">
+    <section id="acknowledgements">
+      <div class="container">
+        <h2>Acknowledgements</h2>
+        <p class="muted" style="max-width:780px; margin:0 auto; text-align:center;">
+          REPLACE_ACK_TEXT (e.g., funding sources, dataset annotators, helpful discussions). Project page template inspired by the Nerfies / academic project page community.
+        </p>
+      </div>
+    </section>
+    -->
+
+  </main>
+
+  <footer>
+    <div class="container">
+      Project Page for ACCV 2026 Submission · Anonymous · Under Review
+    </div>
+  </footer>
+
+  <!-- Lightbox overlay (used by Dataset Showcase cells) -->
+  <div id="lightbox" class="lightbox-overlay" aria-hidden="true">
+    <img class="lightbox-img" id="lb-img" src="" alt="">
+  </div>
+
+  <script>
+    // ===== Sticky nav: show after scroll =====
+    (function(){
+      var nav = document.getElementById('stickyNav');
+      var threshold = 200;
+      window.addEventListener('scroll', function(){
+        if(window.scrollY > threshold) nav.classList.add('visible');
+        else nav.classList.remove('visible');
+      });
+    })();
+
+    // ===== Tab switching (generic for dataset / future tabs) =====
+    function switchTab(group, id){
+      var tabs = document.getElementById(group + '-tabs');
+      Array.from(tabs.querySelectorAll('button')).forEach(function(b){ b.classList.remove('active'); });
+      event.target.classList.add('active');
+      Array.from(document.querySelectorAll('[id^="' + group + '-"]')).forEach(function(el){
+        if(el.classList.contains('tab-content')) el.classList.remove('active');
+      });
+      document.getElementById(group + '-' + id).classList.add('active');
+    }
+
+    // ===== Hover zoom on .zoomable figures =====
+    (function(){
+      if(window.matchMedia && !window.matchMedia('(hover:hover)').matches) return;
+      document.querySelectorAll('.zoomable').forEach(function(fig){
+        var img = fig.querySelector('img');
+        if(!img) return;
+        var scale = parseFloat(fig.dataset.scale || '') || 1.3;
+        fig.addEventListener('mouseenter', function(){
+          fig.style.position = 'relative'; fig.style.zIndex = 9999; fig.style.overflow = 'visible';
+          img.style.boxShadow = '0 6px 18px rgba(0,0,0,.15)';
+        });
+        fig.addEventListener('mouseleave', function(){
+          fig.style.position = ''; fig.style.zIndex = ''; fig.style.overflow = '';
+          img.style.boxShadow = ''; img.style.transform = ''; img.style.transformOrigin = 'center center';
+        });
+        fig.addEventListener('mousemove', function(e){
+          var r = fig.getBoundingClientRect();
+          var x = ((e.clientX - r.left) / r.width) * 100;
+          var y = ((e.clientY - r.top) / r.height) * 100;
+          img.style.transformOrigin = x + '% ' + y + '%';
+          img.style.transform = 'scale(' + scale + ')';
+        });
+      });
+    })();
+
+    // ===== Dataset Showcase: generate 4×4=16 cells × 4 grids =====
+    (function(){
+      var BASE = 'dataset_samples/bocchi_samples_pack/';
+      function genCells(containerId, prefix, suffix){
+        var container = document.getElementById(containerId);
+        if(!container) return;
+        for(var i = 1; i <= 16; i++){
+          var num = String(i).padStart(2, '0');
+          var cell = document.createElement('div');
+          cell.className = 'dataset-cell';
+          var img = document.createElement('img');
+          img.loading = 'lazy';
+          img.decoding = 'async';
+          img.src = BASE + prefix + '_' + num + '_' + suffix;
+          img.alt = prefix + ' sample ' + num;
+          img.onerror = function(){
+            this.parentElement.classList.add('placeholder');
+            this.style.display = 'none';
+          };
+          cell.appendChild(img);
+          container.appendChild(cell);
+        }
+      }
+      genCells('dataset-grid-bocchi-rgb', 'bocchi', 'rgb.jpg');
+      genCells('dataset-grid-bocchi-mask', 'bocchi', 'mask.png');
+      genCells('dataset-grid-inference-rgb', 'inference', 'rgb.jpg');
+      genCells('dataset-grid-inference-mask', 'inference', 'mask.png');
+    })();
+
+    // ===== Qualitative Comparison: 5 row × 4 col tab content =====
+    // Per-case per-model mIoU (extracted from per_image_comparison.csv)
+    var QUAL_METRICS = {
+      "success_06_img0056_margin+0.0260": {"DCTNet":0.7076,"BiSeNetV2":0.2110,"Cellpose3":0.5788,"DDRNet_23":0.0516,"KDSNet_R50":0.1569,"KDSNet_R101":0.5954,"MSDSeg":0.6816,"MSDU_Net":0.4532,"NAFNet":0.4658,"STDC1":0.3359,"STDC2":0.4800,"BEVANet":0.0536,"ESMDL_UNet":0.3173},
+      "success_08_img0585_margin+0.0254": {"DCTNet":0.9440,"BiSeNetV2":0.6688,"Cellpose3":0.2877,"DDRNet_23":0.5993,"KDSNet_R50":0.8210,"KDSNet_R101":0.1608,"MSDSeg":0.8638,"MSDU_Net":0.9073,"NAFNet":0.9185,"STDC1":0.8706,"STDC2":0.8868,"BEVANet":0.8261,"ESMDL_UNet":0.7406},
+      "success_09_img0062_margin+0.0248": {"DCTNet":0.8826,"BiSeNetV2":0.7983,"Cellpose3":0.8462,"DDRNet_23":0.6696,"KDSNet_R50":0.8092,"KDSNet_R101":0.8289,"MSDSeg":0.7937,"MSDU_Net":0.8578,"NAFNet":0.8095,"STDC1":0.8034,"STDC2":0.8060,"BEVANet":0.7860,"ESMDL_UNet":0.7908},
+      "success_04_img0607_margin+0.0312": {"DCTNet":0.9582,"BiSeNetV2":0.8589,"Cellpose3":0.9045,"DDRNet_23":0.8048,"KDSNet_R50":0.9211,"KDSNet_R101":0.9270,"MSDSeg":0.7945,"MSDU_Net":0.7268,"NAFNet":0.9269,"STDC1":0.9032,"STDC2":0.8628,"BEVANet":0.8454,"ESMDL_UNet":0.6604},
+      "success_01_img0338_margin+0.0426": {"DCTNet":0.7552,"BiSeNetV2":0.3528,"Cellpose3":0.7126,"DDRNet_23":0.0831,"KDSNet_R50":0.6253,"KDSNet_R101":0.5386,"MSDSeg":0.4707,"MSDU_Net":0.4502,"NAFNet":0.4983,"STDC1":0.3918,"STDC2":0.4421,"BEVANet":0.1788,"ESMDL_UNet":0.1972},
+      "success_02_img0599_margin+0.0362": {"DCTNet":0.9409,"BiSeNetV2":0.8164,"Cellpose3":0.8945,"DDRNet_23":0.6730,"KDSNet_R50":0.8969,"KDSNet_R101":0.8072,"MSDSeg":0.7247,"MSDU_Net":0.8932,"NAFNet":0.8722,"STDC1":0.9047,"STDC2":0.8981,"BEVANet":0.8744,"ESMDL_UNet":0.2315},
+      "success_05_img0499_margin+0.0280": {"DCTNet":0.8981,"BiSeNetV2":0.7265,"Cellpose3":0.8701,"DDRNet_23":0.6240,"KDSNet_R50":0.6753,"KDSNet_R101":0.6255,"MSDSeg":0.7577,"MSDU_Net":0.8398,"NAFNet":0.6917,"STDC1":0.7900,"STDC2":0.8199,"BEVANet":0.8320,"ESMDL_UNet":0.5891},
+      "success_07_img0067_margin+0.0257": {"DCTNet":0.9183,"BiSeNetV2":0.8591,"Cellpose3":0.8926,"DDRNet_23":0.7112,"KDSNet_R50":0.8743,"KDSNet_R101":0.8751,"MSDSeg":0.7611,"MSDU_Net":0.8905,"NAFNet":0.8373,"STDC1":0.8811,"STDC2":0.8738,"BEVANet":0.8669,"ESMDL_UNet":0.7824}
+    };
+
+    var QUAL_CASES = [
+      // 8 paper success cases for 4×4 grid (4 row × 2 pairs).
+      // S03 (img0370, walking case) removed per Brian's request.
+      // Order: main paper first (S06/S08/S09), then supp (S04/S01/S02/S05/S07).
+      // S10-S12 not in paper, raw files copied to qualitative_raw/ for optional addition.
+      'success_06_img0056_margin+0.0260',  // main Fig 8 (S06)
+      'success_08_img0585_margin+0.0254',  // main Fig 8 (S08)
+      'success_09_img0062_margin+0.0248',  // main Fig 8 (S09)
+      'success_04_img0607_margin+0.0312',  // supp (S04, also was in main before removal)
+      'success_01_img0338_margin+0.0426',  // supp (S01)
+      'success_02_img0599_margin+0.0362',  // supp (S02)
+      'success_05_img0499_margin+0.0280',  // supp (S05)
+      'success_07_img0067_margin+0.0257',  // supp (S07)
+      // Optional extras (not in paper):
+      // 'success_10_img0151_margin+0.0241',
+      // 'success_11_img0604_margin+0.0233',
+      // 'success_12_img0432_margin+0.0209',
+    ];
+
+    var METHOD_LABELS = {
+      'gt': 'GT',
+      'DCTNet': 'MSDCT-UNet (Ours)',
+      'MSDU_Net': 'MSDU-Net',
+      'BiSeNetV2': 'BiSeNetV2',
+      'STDC1': 'STDC1',
+      'STDC2': 'STDC2',
+      'NAFNet': 'NAFNet',
+      'DDRNet_23': 'DDRNet-23',
+      'Cellpose3': 'Cellpose3',
+      'KDSNet_R50': 'KDSNet-R50',
+      'KDSNet_R101': 'KDSNet-R101',
+      'MSDSeg': 'MSDSeg',
+      'BEVANet': 'BEVANet',
+      'ESMDL_UNet': 'ESMDL-UNet',
+    };
+
+    function renderQualGrid(method){
+      var grid = document.getElementById('qual-grid');
+      grid.innerHTML = '';
+
+      // Update outer-frame header with current method name + meta (rank/IoU)
+      var frame = grid.parentElement;
+      var nameEl = document.getElementById('qual-current-method');
+      var metaEl = document.getElementById('qual-current-meta');
+      if(frame && nameEl && metaEl){
+        // Find the matching tab button to source name + meta from one place
+        var btns = document.querySelectorAll('#qual-tabs button');
+        var matched = null;
+        btns.forEach(function(b){
+          var on = b.getAttribute('onclick') || '';
+          if(on.indexOf("'" + method + "'") !== -1) matched = b;
+        });
+        if(matched){
+          var nm = matched.querySelector('.tab-name');
+          var mt = matched.querySelector('.tab-meta');
+          nameEl.textContent = nm ? nm.textContent : method;
+          metaEl.textContent = mt ? mt.textContent : '';
+        }
+        frame.classList.toggle('is-ours', method === 'DCTNet');
+        frame.classList.toggle('is-gt', method === 'gt');
+      }
+      // 4 row × 4 col = 16 cells
+      // Per row: Sample-A Input | Sample-A Method | Sample-B Input | Sample-B Method
+      // 4 rows × 2 pairs = 8 samples (fits exactly with 8 paper cases)
+      var samples = [];
+      for(var i = 0; i < 8; i++){
+        samples.push(QUAL_CASES[i] || null);
+      }
+      for(var r = 0; r < 4; r++){
+        for(var p = 0; p < 2; p++){
+          var idx = r * 2 + p;
+          var caseId = samples[idx];
+          var hasReal = caseId !== null;
+          // Input cell
+          var inputCell = document.createElement('div');
+          inputCell.className = 'qual-cell is-input';
+          if(hasReal){
+            var inputImg = document.createElement('img');
+            inputImg.loading = 'lazy';
+            inputImg.decoding = 'async';
+            inputImg.src = 'qualitative_raw/' + caseId + '/input.png';
+            inputImg.onerror = function(){ this.style.display = 'none'; };
+            inputCell.appendChild(inputImg);
+          } else {
+            inputCell.classList.add('placeholder');
+            inputCell.innerHTML = '<span>[Sample ' + (idx+1) + ' Input]</span>';
+          }
+          var inputLabel = document.createElement('span');
+          inputLabel.className = 'cell-label';
+          inputLabel.textContent = 'Input';
+          inputCell.appendChild(inputLabel);
+          grid.appendChild(inputCell);
+
+          // Method cell
+          var methodCell = document.createElement('div');
+          methodCell.className = 'qual-cell is-method';
+          if(method === 'DCTNet') methodCell.classList.add('is-ours');
+          if(method === 'gt') methodCell.classList.add('is-gt');
+          if(hasReal){
+            var methodImg = document.createElement('img');
+            methodImg.loading = 'lazy';
+            methodImg.decoding = 'async';
+            // Use binary masks (black/white) for clearer comparison
+            var fname = (method === 'gt' ? 'gt_mask.png' : method + '_mask.png');
+            methodImg.src = 'qualitative_raw/' + caseId + '/' + fname;
+            methodImg.onerror = function(){ this.style.display = 'none'; };
+            methodCell.appendChild(methodImg);
+          } else {
+            methodCell.classList.add('placeholder');
+            methodCell.innerHTML = '<span>[Sample ' + (idx+1) + ' ' + METHOD_LABELS[method] + ']</span>';
+          }
+          // Method name is shown in the frame header above the grid, not per-cell.
+          // IoU label (skip GT - GT mask is reference, no metric)
+          if(hasReal && method !== 'gt' && QUAL_METRICS[caseId] && QUAL_METRICS[caseId][method] !== undefined){
+            var iouLabel = document.createElement('span');
+            iouLabel.className = 'iou-label';
+            iouLabel.textContent = 'IoU ' + QUAL_METRICS[caseId][method].toFixed(2);
+            methodCell.appendChild(iouLabel);
+          }
+          grid.appendChild(methodCell);
+        }
+      }
+    }
+
+    function switchQualTab(method){
+      var tabs = document.getElementById('qual-tabs');
+      Array.from(tabs.querySelectorAll('button')).forEach(function(b){ b.classList.remove('active'); });
+      event.target.classList.add('active');
+      renderQualGrid(method);
+    }
+
+    // Initial render
+    renderQualGrid('gt');
+
+    // ===== Per-image scatter (interactive) =====
+    (function(){
+      var DATA = [["0003",0.977,0.972,"BEVANet"],["0005",0.923,0.915,"Cellpose3"],["0027",0.787,0.781,"KDSNet-R101"],["0040",0.879,0.874,"Cellpose3"],["0045",0.915,0.921,"Cellpose3"],["0056",0.708,0.682,"MSDSeg"],["0059",0.921,0.933,"Cellpose3"],["0060",0.866,0.871,"Cellpose3"],["0062",0.883,0.858,"MSDU-Net"],["0063",0.892,0.931,"Cellpose3"],["0067",0.918,0.893,"Cellpose3"],["0095",0.932,0.929,"Cellpose3"],["0106",0.501,0.495,"STDC1"],["0112",0.449,0.623,"Cellpose3"],["0135",0.812,0.832,"STDC2"],["0146",0.852,0.878,"Cellpose3"],["0151",0.775,0.751,"Cellpose3"],["0155",0.64,0.802,"BEVANet"],["0163",0.863,0.859,"Cellpose3"],["0177",0.977,0.98,"Cellpose3"],["0196",0.858,0.909,"MSDU-Net"],["0217",0.872,0.854,"Cellpose3"],["0221",0.884,0.89,"Cellpose3"],["0244",0.74,0.796,"BEVANet"],["0257",0.903,0.89,"Cellpose3"],["0273",0.887,0.87,"Cellpose3"],["0288",0.928,0.911,"Cellpose3"],["0305",0.929,0.936,"Cellpose3"],["0319",0.875,0.897,"Cellpose3"],["0324",0.916,0.926,"Cellpose3"],["0338",0.755,0.713,"Cellpose3"],["0359",0.935,0.934,"MSDU-Net"],["0361",0.735,0.81,"Cellpose3"],["0362",0.968,0.956,"BiSeNetV2"],["0366",0.949,0.943,"Cellpose3"],["0370",0.902,0.868,"MSDU-Net"],["0380",0.252,0.4,"Cellpose3"],["0390",0.837,0.818,"Cellpose3"],["0399",0.812,0.828,"STDC1"],["0425",0.925,0.916,"Cellpose3"],["0426",0.903,0.884,"Cellpose3"],["0428",0.878,0.866,"STDC2"],["0429",0.849,0.864,"Cellpose3"],["0432",0.965,0.944,"Cellpose3"],["0438",0.961,0.954,"MSDU-Net"],["0471",0.839,0.899,"NAFNet"],["0473",0.827,0.827,"Cellpose3"],["0498",0.853,0.896,"KDSNet-R101"],["0499",0.898,0.87,"Cellpose3"],["0509",0.438,0.788,"STDC1"],["0514",0.957,0.948,"Cellpose3"],["0518",0.954,0.941,"Cellpose3"],["0519",0.943,0.937,"STDC2"],["0531",0.489,0.586,"Cellpose3"],["0535",0.959,0.952,"Cellpose3"],["0559",0.887,0.874,"STDC2"],["0561",0.822,0.87,"Cellpose3"],["0573",0.916,0.916,"Cellpose3"],["0585",0.944,0.919,"NAFNet"],["0594",0.984,0.972,"Cellpose3"],["0599",0.941,0.905,"STDC1"],["0604",0.953,0.93,"Cellpose3"],["0607",0.958,0.927,"KDSNet-R101"]];
+
+      // Map img id -> case slug used by qualitative grid (only ids in QUAL_CASES become highlighted+clickable)
+      var HIGHLIGHT = {};
+      for(var i=0;i<QUAL_CASES.length;i++){
+        var slug = QUAL_CASES[i];
+        if(!slug) continue;
+        var m = slug.match(/img(\d+)/);
+        if(m) HIGHLIGHT[m[1]] = slug;
+      }
+
+      var wrap = document.getElementById('scatter-wrap');
+      if(!wrap) return;
+
+      // Layout
+      var W = 560, H = 560;
+      var ML = 56, MR = 18, MT = 18, MB = 50;
+      var PW = W - ML - MR, PH = H - MT - MB;
+
+      // Domain: clamp to [0.2, 1.0] since lowest is ~0.25
+      var DMIN = 0.2, DMAX = 1.0;
+      function sx(v){ return ML + (v - DMIN) / (DMAX - DMIN) * PW; }
+      function sy(v){ return MT + PH - (v - DMIN) / (DMAX - DMIN) * PH; }
+
+      var SVG_NS = 'http://www.w3.org/2000/svg';
+      var svg = document.createElementNS(SVG_NS, 'svg');
+      svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+      svg.setAttribute('role', 'img');
+      svg.setAttribute('aria-label', 'Scatter plot: per-image mIoU comparison');
+
+      // Plot area background
+      var bg = document.createElementNS(SVG_NS, 'rect');
+      bg.setAttribute('x', ML); bg.setAttribute('y', MT);
+      bg.setAttribute('width', PW); bg.setAttribute('height', PH);
+      bg.setAttribute('fill', '#fafafa'); bg.setAttribute('stroke', 'none');
+      svg.appendChild(bg);
+
+      // Gridlines + ticks
+      var ticks = [0.2, 0.4, 0.6, 0.8, 1.0];
+      ticks.forEach(function(t){
+        var gx = document.createElementNS(SVG_NS, 'line');
+        gx.setAttribute('class', 'scatter-tick');
+        gx.setAttribute('x1', sx(t)); gx.setAttribute('x2', sx(t));
+        gx.setAttribute('y1', MT); gx.setAttribute('y2', MT + PH);
+        svg.appendChild(gx);
+        var gy = document.createElementNS(SVG_NS, 'line');
+        gy.setAttribute('class', 'scatter-tick');
+        gy.setAttribute('x1', ML); gy.setAttribute('x2', ML + PW);
+        gy.setAttribute('y1', sy(t)); gy.setAttribute('y2', sy(t));
+        svg.appendChild(gy);
+        // x tick label
+        var tx = document.createElementNS(SVG_NS, 'text');
+        tx.setAttribute('class', 'scatter-tick-text');
+        tx.setAttribute('x', sx(t)); tx.setAttribute('y', MT + PH + 14);
+        tx.setAttribute('text-anchor', 'middle');
+        tx.textContent = t.toFixed(1);
+        svg.appendChild(tx);
+        // y tick label
+        var ty = document.createElementNS(SVG_NS, 'text');
+        ty.setAttribute('class', 'scatter-tick-text');
+        ty.setAttribute('x', ML - 6); ty.setAttribute('y', sy(t) + 3);
+        ty.setAttribute('text-anchor', 'end');
+        ty.textContent = t.toFixed(1);
+        svg.appendChild(ty);
+      });
+
+      // y=x diagonal (within the plotted domain)
+      var diag = document.createElementNS(SVG_NS, 'line');
+      diag.setAttribute('class', 'scatter-diag');
+      diag.setAttribute('x1', sx(DMIN)); diag.setAttribute('y1', sy(DMIN));
+      diag.setAttribute('x2', sx(DMAX)); diag.setAttribute('y2', sy(DMAX));
+      svg.appendChild(diag);
+
+      // Axes (drawn last so they sit on top)
+      var ax = document.createElementNS(SVG_NS, 'line');
+      ax.setAttribute('class', 'scatter-axis');
+      ax.setAttribute('x1', ML); ax.setAttribute('y1', MT + PH);
+      ax.setAttribute('x2', ML + PW); ax.setAttribute('y2', MT + PH);
+      svg.appendChild(ax);
+      var ay = document.createElementNS(SVG_NS, 'line');
+      ay.setAttribute('class', 'scatter-axis');
+      ay.setAttribute('x1', ML); ay.setAttribute('y1', MT);
+      ay.setAttribute('x2', ML); ay.setAttribute('y2', MT + PH);
+      svg.appendChild(ay);
+
+      // Axis labels
+      var xl = document.createElementNS(SVG_NS, 'text');
+      xl.setAttribute('class', 'scatter-axis-label');
+      xl.setAttribute('x', ML + PW / 2); xl.setAttribute('y', H - 10);
+      xl.setAttribute('text-anchor', 'middle');
+      xl.textContent = 'Best baseline mIoU →';
+      svg.appendChild(xl);
+      var yl = document.createElementNS(SVG_NS, 'text');
+      yl.setAttribute('class', 'scatter-axis-label');
+      yl.setAttribute('x', 0); yl.setAttribute('y', 0);
+      yl.setAttribute('text-anchor', 'middle');
+      yl.setAttribute('transform', 'translate(16,' + (MT + PH / 2) + ') rotate(-90)');
+      yl.textContent = 'MSDCT-UNet mIoU →';
+      svg.appendChild(yl);
+
+      // Tooltip
+      var tip = document.createElement('div');
+      tip.className = 'scatter-tip';
+      wrap.appendChild(tip);
+
+      // Sort so highlighted dots render last (on top)
+      var sorted = DATA.slice().sort(function(a,b){
+        var ah = HIGHLIGHT[a[0]] ? 1 : 0, bh = HIGHLIGHT[b[0]] ? 1 : 0;
+        return ah - bh;
+      });
+
+      sorted.forEach(function(row){
+        var id = row[0], ours = row[1], best = row[2], who = row[3];
+        var c = document.createElementNS(SVG_NS, 'circle');
+        c.setAttribute('cx', sx(best));
+        c.setAttribute('cy', sy(ours));
+        var hi = HIGHLIGHT[id];
+        c.setAttribute('r', hi ? 6.5 : 4);
+        var win = ours > best + 0.0005;
+        c.setAttribute('class', 'scatter-dot ' + (win ? 'win' : 'loss') + (hi ? ' hi' : ''));
+        c.setAttribute('data-id', id);
+        c.setAttribute('data-ours', ours);
+        c.setAttribute('data-best', best);
+        c.setAttribute('data-who', who);
+        if(hi) c.setAttribute('data-slug', hi);
+        c.addEventListener('mouseenter', function(ev){
+          var r = wrap.getBoundingClientRect();
+          var dx = parseFloat(c.getAttribute('cx')) / W * r.width;
+          var dy = parseFloat(c.getAttribute('cy')) / H * r.height;
+          tip.style.left = dx + 'px';
+          tip.style.top = dy + 'px';
+          var diff = (ours - best);
+          var sign = diff >= 0 ? '+' : '';
+          tip.innerHTML = '<b>img' + id + '</b><br>'
+            + 'Ours: ' + ours.toFixed(3) + '<br>'
+            + 'Best (' + who + '): ' + best.toFixed(3) + '<br>'
+            + '<span style="opacity:0.7">Δ ' + sign + diff.toFixed(3) + '</span>'
+            + (hi ? '<br><span style="color:#93c5fd">click to view qualitative</span>' : '');
+          tip.classList.add('show');
+        });
+        c.addEventListener('mouseleave', function(){ tip.classList.remove('show'); });
+        if(hi){
+          c.addEventListener('click', function(){
+            // Scroll to the actual qualitative grid (not the section heading) so user lands on the visualization.
+            var qframe = document.querySelector('#qualitative .qual-frame') || document.getElementById('qualitative');
+            if(qframe) qframe.scrollIntoView({behavior:'smooth', block:'center'});
+            // Flash the corresponding cell in the rendered grid
+            setTimeout(function(){
+              var grid = document.getElementById('qual-grid');
+              if(!grid) return;
+              var cells = grid.querySelectorAll('.qual-cell');
+              cells.forEach(function(cell){
+                var img = cell.querySelector('img');
+                if(img && img.src.indexOf(hi + '/') !== -1){
+                  cell.classList.remove('flash');
+                  void cell.offsetWidth;
+                  cell.classList.add('flash');
+                }
+              });
+            }, 600);
+          });
+        }
+        svg.appendChild(c);
+      });
+
+      wrap.appendChild(svg);
+
+      // Summary text
+      var wins = 0, ties = 0;
+      DATA.forEach(function(r){ if(r[1] > r[2] + 0.0005) wins++; else if(Math.abs(r[1]-r[2]) <= 0.0005) ties++; });
+      var losses = DATA.length - wins - ties;
+      var sumEl = document.getElementById('scatter-summary');
+      if(sumEl){
+        sumEl.textContent = '· Ours wins ' + wins + '/' + DATA.length
+          + ' (' + Math.round(wins/DATA.length*100) + '%)'
+          + (ties ? ', ties ' + ties : '')
+          + ', loses ' + losses;
+      }
+    })();
+
+    // ===== Lightbox: click-to-toggle for dataset & qualitative cells =====
+    (function(){
+      var overlay = document.getElementById('lightbox');
+      var lbImg = document.getElementById('lb-img');
+      if(!overlay || !lbImg) return;
+      document.body.addEventListener('click', function(e){
+        var cell = e.target.closest('.dataset-cell, .qual-cell');
+        if(!cell) return;
+        var img = cell.querySelector('img');
+        if(!img) return;
+        lbImg.src = img.src;
+        lbImg.alt = img.alt || '';
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('lb-open');
+      });
+      function close(){
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('lb-open');
+        lbImg.src = '';
+      }
+      overlay.addEventListener('click', close);
+      document.addEventListener('keydown', function(e){
+        if(e.key === 'Escape' && overlay.classList.contains('open')) close();
+      });
+    })();
+  </script>
+
 </body>
 </html>

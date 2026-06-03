@@ -473,7 +473,7 @@
                onerror="this.style.display='none'; this.parentElement.classList.add('placeholder-fig'); this.parentElement.innerHTML='[Blur+Gradient Stats Placeholder: replace with assets/blur_gradient_combined.svg]';">
         </figure>
         <p class="muted" style="text-align:center; max-width:780px; margin:8px auto; font-size:0.9rem;">
-          <strong>(a)</strong> Blur-ratio distribution: BlurDataset spans uniformly but only 200 samples; ReLoBlur concentrates at low ratios (&lt;0.3); BOCCHI at high ratios (&gt;0.6).
+          <strong>(a)</strong> Blur-ratio distribution: CUHK<sub>motion</sub> spans uniformly but only 200 samples; ReLoBlur concentrates at low ratios (&lt;0.3); BOCCHI at high ratios (&gt;0.6).
           <strong>(b)</strong> Per-dataset distribution of mean gradient in blur vs.&nbsp;sharp regions. BOCCHI and the Inference Dataset are the only datasets with Δ &gt; 0 (textured-foreground regime).
         </p>
       </div>
@@ -520,7 +520,7 @@
         </div>
 
         <p style="text-align:center; font-size:0.85rem; color:var(--muted); max-width:780px; margin:14px auto 0;">
-          Selected success cases where MSDCT-UNet outperforms baselines. Predictions are binary masks (white = predicted blur).
+          Selected success cases where MSDCT-UNet outperforms baselines. Predictions are binary masks (white = sharp, black = predicted blur).
         </p>
       </div>
     </section>
@@ -546,7 +546,7 @@
               <tr>
                 <th rowspan="2">Method</th>
                 <th colspan="3">BOCCHI</th>
-                <th colspan="3">BlurDataset</th>
+                <th colspan="3">CUHK<sub>motion</sub></th>
                 <th colspan="3">ReLoBlur</th>
               </tr>
               <tr>
@@ -560,11 +560,11 @@
               <tr><td>BiSeNetV2</td>     <td>0.760</td><td>0.903</td><td>0.470</td><td>0.525</td><td>0.646</td><td>0.166</td><td>0.917</td><td>0.909</td><td>0.800</td></tr>
               <tr><td>STDC1</td>         <td>0.778</td><td>0.911</td><td>0.457</td><td>0.550</td><td>0.681</td><td>0.260</td><td>0.917</td><td>0.910</td><td>0.795</td></tr>
               <tr><td>STDC2</td>         <td class="third">0.799</td><td class="third">0.921</td><td>0.495</td><td>0.558</td><td>0.683</td><td>0.197</td><td>0.918</td><td>0.910</td><td>0.800</td></tr>
-              <tr><td>NAFNet</td>        <td>0.760</td><td>0.902</td><td>0.452</td><td>0.523</td><td>0.627</td><td>0.213</td><td class="third">0.922</td><td>0.913</td><td>0.821</td></tr>
+              <tr><td>NAFNet</td>        <td>0.760</td><td>0.902</td><td>0.452</td><td>0.523</td><td>0.627</td><td>0.213</td><td class="third">0.922</td><td>0.913</td><td class="third">0.821</td></tr>
               <tr><td>DDRNet-23</td>     <td>0.701</td><td>0.886</td><td>0.351</td><td>0.520</td><td>0.643</td><td>0.172</td><td>0.912</td><td>0.906</td><td>0.766</td></tr>
               <tr><td>Cellpose3</td>     <td class="second">0.838</td><td class="second">0.935</td><td class="second">0.643</td><td class="best">0.665</td><td class="best">0.763</td><td class="best">0.403</td><td class="second">0.929</td><td class="second">0.921</td><td class="second">0.850</td></tr>
               <tr><td>KDSNet-R50</td>    <td>0.783</td><td>0.915</td><td>0.469</td><td>0.549</td><td>0.671</td><td>0.219</td><td>0.919</td><td>0.912</td><td>0.803</td></tr>
-              <tr><td>KDSNet-R101</td>   <td>0.773</td><td>0.905</td><td>0.446</td><td>0.544</td><td>0.662</td><td>0.243</td><td class="third">0.921</td><td class="third">0.914</td><td>0.812</td></tr>
+              <tr><td>KDSNet-R101</td>   <td>0.773</td><td>0.905</td><td>0.446</td><td>0.544</td><td>0.662</td><td>0.243</td><td>0.921</td><td class="third">0.914</td><td>0.812</td></tr>
               <tr><td>MSDSeg</td>        <td>0.714</td><td>0.892</td><td>0.360</td><td>0.517</td><td>0.598</td><td>0.202</td><td>0.911</td><td>0.905</td><td>0.766</td></tr>
               <tr><td>BEVANet</td>       <td>0.778</td><td>0.912</td><td>0.518</td><td>0.548</td><td>0.653</td><td>0.217</td><td>0.919</td><td>0.911</td><td>0.798</td></tr>
               <tr><td>ESMDL-UNet</td>    <td>0.677</td><td>0.866</td><td>0.270</td><td>0.432</td><td>0.603</td><td>0.139</td><td>0.798</td><td>0.793</td><td>0.364</td></tr>
@@ -583,7 +583,7 @@
               <tr>
                 <th rowspan="2">Method</th>
                 <th colspan="3">Trained on BOCCHI (633)</th>
-                <th colspan="3">Trained on BlurDS (200)</th>
+                <th colspan="3">Trained on CUHK<sub>motion</sub> (200)</th>
                 <th colspan="3">Trained on ReLoBlur (1,200)</th>
               </tr>
               <tr>

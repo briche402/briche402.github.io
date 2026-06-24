@@ -410,7 +410,7 @@
         <h2>Abstract</h2>
         <div class="content">
           <p>
-            Local motion blur detection requires pixel-level localization of blurred regions. Existing benchmarks let models rely on gradient shortcuts that fail to transfer. We introduce <strong>BOCCHI</strong> (<strong>B</strong>lurred <strong>O</strong>bjects <strong>C</strong>aptured across <strong>C</strong>ameras with <strong>H</strong>uman-annotated <strong>I</strong>magery), a real-captured benchmark of 633 pixel-annotated images whose textured blurred foregrounds against varied backgrounds defeat these shortcuts, and propose <strong>MSDCT-UNet</strong> (Multi-Scale Discrete Cosine Transform UNet), a frequency-aware encoder-decoder injecting multi-scale DCT priors through DCT Attention and FiLM. MSDCT-UNet ranks first in in-domain mIoU (0.850, +1.25 pp over the second-best baseline) and boundary localization on BOCCHI. BOCCHI-trained models <strong>outperform every other training source</strong> on cross-dataset transfer with fewer training images: +2.2 pp mIoU over OMoBlur (994), +13.8 pp over ReLoBlur (1,200), and +34.9 pp over CUHK<sub>motion</sub> (200).
+            Local motion blur detection requires pixel-level localization of blurred regions. Existing benchmarks let models rely on gradient shortcuts that fail to transfer. We introduce <strong>BOCCHI</strong> (<strong>B</strong>lurred <strong>O</strong>bjects <strong>C</strong>aptured across <strong>C</strong>ameras with <strong>H</strong>uman-annotated <strong>I</strong>magery), a real-captured benchmark of 633 pixel-annotated images whose textured blurred foregrounds against varied backgrounds defeat these shortcuts, and propose <strong>MSDCT-UNet</strong> (Multi-Scale Discrete Cosine Transform UNet), a frequency-aware encoder-decoder injecting multi-scale DCT priors through DCT Attention and FiLM. MSDCT-UNet ranks first in in-domain mIoU (0.850, +1.2 pp over the second-best baseline) and boundary localization on BOCCHI. BOCCHI-trained models <strong>outperform every other training source</strong> on cross-dataset transfer with fewer training images: +2.2 pp mIoU over OMoBlur (994), +13.8 pp over ReLoBlur (1,200), and +34.9 pp over CUHK<sub>motion</sub> (200).
           </p>
         </div>
       </div>
@@ -463,7 +463,7 @@
           <div class="stat-item"><div class="stat-value">633</div><div class="stat-label">Images</div></div>
           <div class="stat-item"><div class="stat-value">5</div><div class="stat-label">Cameras</div></div>
           <div class="stat-item"><div class="stat-value">0.78</div><div class="stat-label">Mean Blur Ratio</div></div>
-          <div class="stat-item"><div class="stat-value">68.7</div><div class="stat-label">Mean Blur Gradient</div></div>
+          <div class="stat-item"><div class="stat-value">68.7</div><div class="stat-label">Mean Sharp Gradient</div></div>
         </div>
 
         <!-- Two distinguishing properties of BOCCHI: blur-ratio + gradient inversion -->
@@ -493,7 +493,7 @@
 
         <div class="tab-nav tab-nav-grid7" id="qual-tabs">
           <button class="is-gt active" onclick="switchQualTab('gt')"><span class="tab-name">GT</span><span class="tab-meta">reference</span></button>
-          <button class="is-ours" onclick="switchQualTab('DCTNet')"><span class="tab-name">MSDCT-UNet (Ours)</span><span class="tab-meta">0.850 · #1</span></button>
+          <button class="is-ours" onclick="switchQualTab('DCTNet')"><span class="tab-name">MSDCT-UNet (Proposed)</span><span class="tab-meta">0.850 · #1</span></button>
           <button onclick="switchQualTab('Cellpose3')"><span class="tab-name">Cellpose3</span><span class="tab-meta">0.838 · #2</span></button>
           <button onclick="switchQualTab('STDC2')"><span class="tab-name">STDC2</span><span class="tab-meta">0.799 · #3</span></button>
           <button onclick="switchQualTab('MSDU_Net')"><span class="tab-name">MSDU-Net</span><span class="tab-meta">0.796 · #4</span></button>
@@ -850,7 +850,7 @@
 
     var METHOD_LABELS = {
       'gt': 'GT',
-      'DCTNet': 'MSDCT-UNet (Ours)',
+      'DCTNet': 'MSDCT-UNet (Proposed)',
       'MSDU_Net': 'MSDU-Net',
       'BiSeNetV2': 'BiSeNetV2',
       'STDC1': 'STDC1',

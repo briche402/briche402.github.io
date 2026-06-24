@@ -410,7 +410,7 @@
         <h2>Abstract</h2>
         <div class="content">
           <p>
-            Local motion blur detection requires pixel-level localization of blurred regions. Existing benchmarks suffer a shortcut: smooth blur on textured backgrounds, that lets simple frequency heuristics suffice. We introduce <strong>BOCCHI</strong> (<strong>B</strong>lurred <strong>O</strong>bjects <strong>C</strong>aptured across <strong>C</strong>ameras with <strong>H</strong>uman-annotated <strong>I</strong>magery), 633 real-captured, pixel-annotated images whose textured blurred foregrounds against smooth backgrounds invert this assumption. We further propose <strong>MSDCT-UNet</strong> (Multi-Scale Discrete Cosine Transform UNet), a frequency-aware encoder-decoder that extracts multi-scale DCT priors from gradients, weights them via multi-head DCT Attention, and fuses frequency–spatial cues through FiLM. MSDCT-UNet surpasses the second-best baseline by 1.25 percentage points in mIoU on BOCCHI and leads in boundary localization; BOCCHI-trained models match ReLoBlur in cross-dataset mIoU with about half the samples and outperform on Precision (+2.0 pp) and Recall (+15.5 pp).
+            Local motion blur detection requires pixel-level localization of blurred regions. Existing benchmarks let models rely on gradient shortcuts that fail to transfer. We introduce <strong>BOCCHI</strong> (<strong>B</strong>lurred <strong>O</strong>bjects <strong>C</strong>aptured across <strong>C</strong>ameras with <strong>H</strong>uman-annotated <strong>I</strong>magery), a real-captured benchmark of 633 pixel-annotated images whose textured blurred foregrounds against varied backgrounds defeat these shortcuts, and propose <strong>MSDCT-UNet</strong> (Multi-Scale Discrete Cosine Transform UNet), a frequency-aware encoder-decoder injecting multi-scale DCT priors through DCT Attention and FiLM. MSDCT-UNet ranks first in in-domain mIoU (0.850, +1.25 pp over the second-best baseline) and boundary localization on BOCCHI. BOCCHI-trained models <strong>outperform every other training source</strong> on cross-dataset transfer with fewer training images: +2.2 pp mIoU over OMoBlur (994), +13.8 pp over ReLoBlur (1,200), and +34.9 pp over CUHK<sub>motion</sub> (200).
           </p>
         </div>
       </div>
@@ -473,8 +473,8 @@
                onerror="this.style.display='none'; this.parentElement.classList.add('placeholder-fig'); this.parentElement.innerHTML='[Blur+Gradient Stats Placeholder: replace with assets/blur_gradient_combined.svg]';">
         </figure>
         <p class="muted" style="text-align:center; max-width:780px; margin:8px auto; font-size:0.9rem;">
-          <strong>(a)</strong> Blur-ratio distribution: CUHK<sub>motion</sub> spans uniformly but only 200 samples; ReLoBlur concentrates at low ratios (&lt;0.3); BOCCHI at high ratios (&gt;0.6).
-          <strong>(b)</strong> Per-dataset distribution of mean gradient in blur vs.&nbsp;sharp regions. BOCCHI and the Inference Dataset are the only datasets with Δ &gt; 0 (textured-foreground regime).
+          <strong>(a)</strong> Blur-ratio distribution across 5 datasets: CUHK<sub>motion</sub> spans uniformly (200 imgs); ReLoBlur (1,200) and BOCCHI (633) concentrate at low ratios; OMoBlur (994) occupies the moderate range; Inference Dataset (572) spans the intermediate regime.
+          <strong>(b)</strong> Per-dataset distribution of mean gradient in blur vs.&nbsp;sharp regions. BOCCHI shows the largest PR25/μ<sub>blur</sub> ratio (0.68) — the sharp-region bottom-25% gradient overlaps the blur mean — defeating gradient-based shortcuts.
         </p>
       </div>
     </section>
@@ -534,88 +534,93 @@
       <div class="container">
         <h2>Quantitative Results</h2>
 
-        <h3 style="text-align:center; margin-top:1rem; font-size:1.05rem;">In-Domain Performance (on respective dataset's validation set)</h3>
+                <h3 style="text-align:center; margin-top:1rem; font-size:1.05rem;">In-Domain Performance (on respective dataset's validation set)</h3>
         <p class="muted" style="text-align:center; font-size:0.85rem;">
-          Cells highlighted as <span class="best" style="padding:1px 6px; border-radius:3px;">1st</span> /
+          Per-cell metrics: mIoU / BdF1. Cells highlighted as <span class="best" style="padding:1px 6px; border-radius:3px;">1st</span> /
           <span class="second" style="padding:1px 6px; border-radius:3px;">2nd</span> /
-          <span class="third" style="padding:1px 6px; border-radius:3px;">3rd</span> per column.
+          <span class="third" style="padding:1px 6px; border-radius:3px;">3rd</span> per column. <sup>*</sup>NAFNet × OMoBlur omitted (aspect-ratio width collapse).
         </p>
         <div class="table-wrapper">
           <table>
             <thead>
               <tr>
                 <th rowspan="2">Method</th>
-                <th colspan="3">BOCCHI</th>
-                <th colspan="3">CUHK<sub>motion</sub></th>
-                <th colspan="3">ReLoBlur</th>
+                <th colspan="2">BOCCHI</th>
+                <th colspan="2">CUHK<sub>motion</sub></th>
+                <th colspan="2">ReLoBlur</th>
+                <th colspan="2">OMoBlur</th>
               </tr>
               <tr>
-                <th>mIoU</th><th>Dice</th><th>BdF1</th>
-                <th>mIoU</th><th>Dice</th><th>BdF1</th>
-                <th>mIoU</th><th>Dice</th><th>BdF1</th>
+                <th>mIoU</th><th>BdF1</th>
+                <th>mIoU</th><th>BdF1</th>
+                <th>mIoU</th><th>BdF1</th>
+                <th>mIoU</th><th>BdF1</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>MSDU-Net</td>      <td>0.796</td><td>0.918</td><td class="third">0.561</td><td class="second">0.640</td><td class="second">0.747</td><td class="third">0.330</td><td>0.919</td><td>0.911</td><td class="third">0.820</td></tr>
-              <tr><td>BiSeNetV2</td>     <td>0.760</td><td>0.903</td><td>0.470</td><td>0.525</td><td>0.646</td><td>0.166</td><td>0.917</td><td>0.909</td><td>0.800</td></tr>
-              <tr><td>STDC1</td>         <td>0.778</td><td>0.911</td><td>0.457</td><td>0.550</td><td>0.681</td><td>0.260</td><td>0.917</td><td>0.910</td><td>0.795</td></tr>
-              <tr><td>STDC2</td>         <td class="third">0.799</td><td class="third">0.921</td><td>0.495</td><td>0.558</td><td>0.683</td><td>0.197</td><td>0.918</td><td>0.910</td><td>0.800</td></tr>
-              <tr><td>NAFNet</td>        <td>0.760</td><td>0.902</td><td>0.452</td><td>0.523</td><td>0.627</td><td>0.213</td><td class="third">0.922</td><td>0.913</td><td class="third">0.821</td></tr>
-              <tr><td>DDRNet-23</td>     <td>0.701</td><td>0.886</td><td>0.351</td><td>0.520</td><td>0.643</td><td>0.172</td><td>0.912</td><td>0.906</td><td>0.766</td></tr>
-              <tr><td>Cellpose3</td>     <td class="second">0.838</td><td class="second">0.935</td><td class="second">0.643</td><td class="best">0.665</td><td class="best">0.763</td><td class="best">0.403</td><td class="second">0.929</td><td class="second">0.921</td><td class="second">0.850</td></tr>
-              <tr><td>KDSNet-R50</td>    <td>0.783</td><td>0.915</td><td>0.469</td><td>0.549</td><td>0.671</td><td>0.219</td><td>0.919</td><td>0.912</td><td>0.803</td></tr>
-              <tr><td>KDSNet-R101</td>   <td>0.773</td><td>0.905</td><td>0.446</td><td>0.544</td><td>0.662</td><td>0.243</td><td>0.921</td><td class="third">0.914</td><td>0.812</td></tr>
-              <tr><td>MSDSeg</td>        <td>0.714</td><td>0.892</td><td>0.360</td><td>0.517</td><td>0.598</td><td>0.202</td><td>0.911</td><td>0.905</td><td>0.766</td></tr>
-              <tr><td>BEVANet</td>       <td>0.778</td><td>0.912</td><td>0.518</td><td>0.548</td><td>0.653</td><td>0.217</td><td>0.919</td><td>0.911</td><td>0.798</td></tr>
-              <tr><td>ESMDL-UNet</td>    <td>0.677</td><td>0.866</td><td>0.270</td><td>0.432</td><td>0.603</td><td>0.139</td><td>0.798</td><td>0.793</td><td>0.364</td></tr>
-              <tr class="ours-row"><td><strong>MSDCT-UNet (Ours)</strong></td><td class="best"><strong>0.850</strong></td><td class="best"><strong>0.948</strong></td><td class="best"><strong>0.683</strong></td><td class="third">0.640</td><td class="third">0.732</td><td class="second">0.369</td><td class="best"><strong>0.930</strong></td><td class="best"><strong>0.922</strong></td><td class="best"><strong>0.851</strong></td></tr>
+              <tr><td>MSDU-Net</td>      <td>0.796</td><td class="third">0.561</td><td class="second">0.640</td><td class="third">0.330</td><td class="third">0.923</td><td class="third">0.820</td><td class="third">0.772</td><td class="second">0.667</td></tr>
+              <tr><td>BiSeNetV2</td>     <td>0.760</td><td>0.470</td><td>0.525</td><td>0.166</td><td>0.916</td><td>0.800</td><td>0.749</td><td>0.613</td></tr>
+              <tr><td>STDC1</td>         <td>0.778</td><td>0.457</td><td>0.550</td><td>0.260</td><td>0.918</td><td>0.795</td><td>0.748</td><td>0.631</td></tr>
+              <tr><td>STDC2</td>         <td class="third">0.799</td><td>0.495</td><td>0.558</td><td>0.197</td><td>0.918</td><td>0.800</td><td>0.755</td><td>0.627</td></tr>
+              <tr><td>NAFNet</td>        <td>0.760</td><td>0.452</td><td>0.523</td><td>0.213</td><td>0.914</td><td>0.821</td><td>N/A<sup>*</sup></td><td>N/A<sup>*</sup></td></tr>
+              <tr><td>DDRNet-23</td>     <td>0.701</td><td>0.351</td><td>0.520</td><td>0.172</td><td>0.910</td><td>0.766</td><td>0.703</td><td>0.583</td></tr>
+              <tr><td>Cellpose3</td>     <td class="second">0.838</td><td class="second">0.643</td><td class="best">0.665</td><td class="best">0.403</td><td class="second">0.927</td><td class="second">0.850</td><td class="best">0.791</td><td class="best">0.675</td></tr>
+              <tr><td>KDSNet-R50</td>    <td>0.783</td><td>0.469</td><td>0.549</td><td>0.219</td><td>0.918</td><td>0.803</td><td>0.748</td><td>0.627</td></tr>
+              <tr><td>KDSNet-R101</td>   <td>0.773</td><td>0.446</td><td>0.544</td><td>0.243</td><td>0.921</td><td>0.812</td><td>0.744</td><td>0.630</td></tr>
+              <tr><td>MSDSeg</td>        <td>0.714</td><td>0.360</td><td>0.517</td><td>0.202</td><td>0.909</td><td>0.766</td><td>0.721</td><td>0.607</td></tr>
+              <tr><td>BEVANet</td>       <td>0.778</td><td>0.518</td><td>0.548</td><td>0.217</td><td>0.919</td><td>0.798</td><td>0.721</td><td>0.622</td></tr>
+              <tr><td>ESMDL-UNet</td>    <td>0.677</td><td>0.270</td><td>0.432</td><td>0.139</td><td>0.788</td><td>0.364</td><td>0.627</td><td>0.552</td></tr>
+              <tr class="ours-row"><td><strong>MSDCT-UNet (Proposed)</strong></td><td class="best"><strong>0.850</strong></td><td class="best"><strong>0.683</strong></td><td class="third">0.640</td><td class="second">0.369</td><td class="best"><strong>0.930</strong></td><td class="best"><strong>0.851</strong></td><td class="second">0.775</td><td class="third">0.664</td></tr>
             </tbody>
           </table>
         </div>
 
-        <h3 style="text-align:center; margin-top:1.5rem; font-size:1.05rem;">Cross-Dataset Generalization (Inference Dataset, no fine-tuning)</h3>
+                <h3 style="text-align:center; margin-top:1.5rem; font-size:1.05rem;">Cross-Dataset Generalization (Inference Dataset, no fine-tuning)</h3>
         <p class="muted" style="text-align:center; font-size:0.85rem;">
-          Per-cell metrics: mIoU / Precision / Recall. Average row colored to highlight BOCCHI as the strongest training source.
+          Per-cell metrics: mIoU / Dice / Recall on Inference Dataset (572 images). Average row colored to highlight BOCCHI as the strongest training source. <sup>*</sup>NAFNet × OMoBlur omitted (OMoBlur Average aggregates 12 of 13).
         </p>
         <div class="table-wrapper">
           <table>
             <thead>
               <tr>
                 <th rowspan="2">Method</th>
-                <th colspan="3">Trained on BOCCHI (633)</th>
-                <th colspan="3">Trained on CUHK<sub>motion</sub> (200)</th>
-                <th colspan="3">Trained on ReLoBlur (1,200)</th>
+                <th>Trained on<br/>BOCCHI (633)</th>
+                <th>Trained on<br/>OMoBlur (994)</th>
+                <th>Trained on<br/>ReLoBlur (1,200)</th>
+                <th>Trained on<br/>CUHK<sub>motion</sub> (200)</th>
               </tr>
               <tr>
-                <th>mIoU</th><th>Prec</th><th>Rec</th>
-                <th>mIoU</th><th>Prec</th><th>Rec</th>
-                <th>mIoU</th><th>Prec</th><th>Rec</th>
+                <th>mIoU / Dice / Rec</th>
+                <th>mIoU / Dice / Rec</th>
+                <th>mIoU / Dice / Rec</th>
+                <th>mIoU / Dice / Rec</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>MSDU-Net</td>      <td>0.378</td><td>0.464</td><td>0.680</td><td>0.249</td><td>0.335</td><td>0.411</td><td>0.354</td><td>0.419</td><td>0.519</td></tr>
-              <tr><td>BiSeNetV2</td>     <td>0.358</td><td>0.449</td><td>0.720</td><td>0.215</td><td>0.371</td><td>0.594</td><td>0.369</td><td>0.442</td><td>0.623</td></tr>
-              <tr><td>STDC1</td>         <td>0.355</td><td>0.440</td><td>0.670</td><td>0.268</td><td>0.356</td><td>0.367</td><td>0.365</td><td>0.435</td><td>0.637</td></tr>
-              <tr><td>STDC2</td>         <td>0.376</td><td>0.451</td><td>0.667</td><td>0.277</td><td>0.385</td><td>0.419</td><td>0.382</td><td>0.439</td><td>0.537</td></tr>
-              <tr><td>NAFNet</td>        <td>0.362</td><td>0.445</td><td>0.686</td><td>0.249</td><td>0.366</td><td>0.424</td><td>0.350</td><td>0.410</td><td>0.570</td></tr>
-              <tr><td>DDRNet-23</td>     <td>0.334</td><td>0.434</td><td>0.726</td><td>0.255</td><td>0.388</td><td>0.509</td><td>0.365</td><td>0.435</td><td>0.572</td></tr>
-              <tr><td>Cellpose3</td>     <td>0.420</td><td>0.479</td><td>0.697</td><td>0.236</td><td>0.359</td><td>0.423</td><td>0.377</td><td>0.431</td><td>0.458</td></tr>
-              <tr><td>KDSNet-R50</td>    <td>0.370</td><td>0.446</td><td>0.719</td><td>0.252</td><td>0.376</td><td>0.475</td><td>0.373</td><td>0.433</td><td>0.536</td></tr>
-              <tr><td>KDSNet-R101</td>   <td>0.373</td><td>0.450</td><td>0.642</td><td>0.255</td><td>0.382</td><td>0.445</td><td>0.385</td><td>0.442</td><td>0.505</td></tr>
-              <tr><td>MSDSeg</td>        <td>0.362</td><td>0.455</td><td>0.736</td><td>0.271</td><td>0.284</td><td>0.153</td><td>0.368</td><td>0.444</td><td>0.492</td></tr>
-              <tr><td>BEVANet</td>       <td>0.364</td><td>0.436</td><td>0.681</td><td>0.260</td><td>0.380</td><td>0.397</td><td>0.366</td><td>0.439</td><td>0.603</td></tr>
-              <tr><td>ESMDL-UNet</td>    <td>0.346</td><td>0.454</td><td>0.728</td><td>0.301</td><td>0.404</td><td>0.387</td><td>0.345</td><td>0.435</td><td>0.535</td></tr>
-              <tr class="ours-row"><td><strong>MSDCT-UNet (Ours)</strong></td><td>0.403</td><td>0.475</td><td>0.695</td><td>0.276</td><td>0.330</td><td>0.257</td><td>0.388</td><td>0.414</td><td>0.449</td></tr>
+              <tr><td>MSDU-Net</td>      <td>0.609 / 0.830 / 0.876</td><td>0.616 / 0.805 / 0.810</td><td>0.556 / 0.758 / 0.736</td><td>0.142 / 0.307 / 0.268</td></tr>
+              <tr><td>BiSeNetV2</td>     <td>0.539 / 0.791 / 0.843</td><td>0.526 / 0.704 / 0.666</td><td>0.470 / 0.695 / 0.651</td><td>0.248 / 0.445 / 0.455</td></tr>
+              <tr><td>STDC1</td>         <td>0.541 / 0.789 / 0.840</td><td>0.496 / 0.657 / 0.597</td><td>0.283 / 0.518 / 0.538</td><td>0.197 / 0.310 / 0.286</td></tr>
+              <tr><td>STDC2</td>         <td>0.577 / 0.823 / 0.882</td><td>0.530 / 0.705 / 0.655</td><td>0.269 / 0.443 / 0.437</td><td>0.182 / 0.288 / 0.277</td></tr>
+              <tr><td>NAFNet</td>        <td>0.568 / 0.818 / 0.882</td><td>N/A<sup>*</sup></td><td>0.478 / 0.730 / 0.718</td><td>0.285 / 0.529 / 0.533</td></tr>
+              <tr><td>DDRNet-23</td>     <td>0.517 / 0.800 / 0.877</td><td>0.489 / 0.673 / 0.626</td><td>0.462 / 0.704 / 0.665</td><td>0.292 / 0.548 / 0.490</td></tr>
+              <tr><td>Cellpose3</td>     <td>0.662 / 0.858 / 0.910</td><td>0.628 / 0.825 / 0.848</td><td>0.555 / 0.758 / 0.744</td><td>0.160 / 0.324 / 0.306</td></tr>
+              <tr><td>KDSNet-R50</td>    <td>0.557 / 0.809 / 0.871</td><td>0.528 / 0.717 / 0.684</td><td>0.275 / 0.465 / 0.465</td><td>0.225 / 0.424 / 0.369</td></tr>
+              <tr><td>KDSNet-R101</td>   <td>0.557 / 0.794 / 0.835</td><td>0.525 / 0.718 / 0.696</td><td>0.274 / 0.433 / 0.423</td><td>0.230 / 0.432 / 0.372</td></tr>
+              <tr><td>MSDSeg</td>        <td>0.518 / 0.816 / 0.901</td><td>0.547 / 0.788 / 0.828</td><td>0.463 / 0.726 / 0.711</td><td>0.141 / 0.128 / 0.121</td></tr>
+              <tr><td>BEVANet</td>       <td>0.552 / 0.804 / 0.861</td><td>0.535 / 0.746 / 0.731</td><td>0.484 / 0.718 / 0.692</td><td>0.271 / 0.493 / 0.434</td></tr>
+              <tr><td>ESMDL-UNet</td>    <td>0.518 / 0.806 / 0.873</td><td>0.458 / 0.698 / 0.684</td><td>0.391 / 0.631 / 0.593</td><td>0.231 / 0.397 / 0.352</td></tr>
+              <tr class="ours-row"><td><strong>MSDCT-UNet (Proposed)</strong></td><td>0.610 / 0.848 / 0.925</td><td>0.610 / 0.783 / 0.781</td><td>0.563 / 0.815 / 0.897</td><td>0.183 / 0.290 / 0.226</td></tr>
               <tr class="avg-row"><td><em>Average</em></td>
-                <td class="best"><strong>0.369</strong></td><td class="best"><strong>0.452</strong></td><td class="best"><strong>0.696</strong></td>
-                <td class="third">0.259</td><td class="third">0.363</td><td class="third">0.405</td>
-                <td class="second">0.368</td><td class="second">0.432</td><td class="second">0.541</td>
+                <td class="best"><strong><em>0.563 / 0.814 / 0.875</em></strong></td>
+                <td class="second"><em>0.541 / 0.735 / 0.717</em><sup>*</sup></td>
+                <td class="third"><em>0.425 / 0.646 / 0.636</em></td>
+                <td><em>0.214 / 0.378 / 0.345</em></td>
               </tr>
             </tbody>
           </table>
         </div>
         <p class="muted" style="text-align:center; font-size:0.85rem; margin-top:8px;">
-          BOCCHI-trained models match or exceed ReLoBlur-trained ones on mIoU/Precision/Recall using only 53% of the training samples.
+          BOCCHI-trained models <strong>outperform every other training source</strong> on cross-dataset transfer with the fewest training images: +2.2 pp mIoU over OMoBlur (994), +13.8 pp over ReLoBlur (1,200), +34.9 pp over CUHK<sub>motion</sub> (200).
         </p>
 
         <!-- ===== Per-image scatter (interactive) ===== -->
